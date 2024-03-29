@@ -3,6 +3,7 @@
 
 #include <string>
 #include <opencv2/opencv.hpp>
+#include <cmath>
 
 #pragma once
 
@@ -13,11 +14,14 @@ public:
     ~FileHandler();
     bool readFile(std::string name, bool img);
     bool showImage(bool img);
+    bool RGB_HSB_RGB(bool img);
 
 
 private:
-    cv::Mat image0;
-    cv::Mat image1;
+    bool RGBtoHSB(bool img);
+    bool HSBtoRGB(bool img);
+
+    cv::Mat image[2];
 };
 
 #endif

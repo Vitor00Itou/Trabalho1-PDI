@@ -15,6 +15,9 @@ public:
     bool readFile(std::string name, bool img);
     bool showImage(bool img);
     bool RGB_HSB_RGB(bool img);
+    bool hueFilter(bool img, double factor);
+    bool saturationFilter(bool img, double factor);
+    bool brightnessFilter(bool img, double factor);
 
 
 private:

@@ -203,3 +203,102 @@ bool FileHandler::RGB_HSB_RGB(bool img){
     
     return true;
 }
+
+bool FileHandler::hueFilter(bool img, double factor){
+
+    try
+    {
+        RGBtoHSB(img);
+        for (int y = 0; y < image[img].rows; ++y) {
+            for (int x = 0; x < image[img].cols; ++x) {
+                // Acessar o pixel na posição (x, y)
+                cv::Vec3f& pixel = image[img].at<cv::Vec3f>(y, x);
+
+                // Recebendo os valores
+                double h = ((double)pixel[2]) + factor;
+
+                // Aplica a operação de módulo para garantir que a matiz esteja no intervalo de 0 a 360
+                h = fmod(h, 360.0);
+                // Se o resultado do módulo for negativo, adicionamos 360 para obter um valor positivo equivalente
+                if (h < 0) {
+                    h += 360.0;
+                }
+
+                pixel[2] = h;
+                
+            }
+
+        }
+        HSBtoRGB(img);
+    }
+    catch(const std::exception& e)
+    {
+        return false;
+    }
+
+    return true;
+}
+bool FileHandler::saturationFilter(bool img, double factor){
+
+    try
+    {
+        RGBtoHSB(img);
+        for (int y = 0; y < image[img].rows; ++y) {
+            for (int x = 0; x < image[img].cols; ++x) {
+                // Acessar o pixel na posição (x, y)
+                cv::Vec3f& pixel = image[img].at<cv::Vec3f>(y, x);
+
+                // Recebendo os valores
+                double s = ((double)pixel[1]) * factor;
+
+                if (s > 1.0)
+                {
+                    pixel[1] = 1.0;
+                }else{
+                    pixel[1] = s;
+                }
+                
+            }
+
+        }
+        HSBtoRGB(img);
+    }
+    catch(const std::exception& e)
+    {
+        return false;
+    }
+
+    return true;
+}
+bool FileHandler::brightnessFilter(bool img, double factor){
+
+    try
+    {
+        RGBtoHSB(img);
+        for (int y = 0; y < image[img].rows; ++y) {
+            for (int x = 0; x < image[img].cols; ++x) {
+                // Acessar o pixel na posição (x, y)
+                cv::Vec3f& pixel = image[img].at<cv::Vec3f>(y, x);
+
+                // Recebendo os valores
+                double b = ((double)pixel[0]) * factor;
+
+                if (b > 1.0)
+                {
+                    pixel[0] = 1.0;
+                }else{
+                    pixel[0] = b;
+                }
+                
+            }
+
+        }
+        HSBtoRGB(img);
+    }
+    catch(const std::exception& e)
+    {
+        return false;
+    }
+
+    return true;
+}

@@ -6,6 +6,8 @@ int main(){
     FileHandler file;
     std::string fileName;
     bool imgNumber;
+    char filterOption;
+    double filterFactor;
     int option;
 
     while (true)
@@ -15,6 +17,7 @@ int main(){
         std::cout << "1-Carregar nova imagem" << std::endl;
         std::cout << "2-Vizualizar imagem" << std::endl;
         std::cout << "3-Conversão RGB-HSB-RGB" << std::endl;
+        std::cout << "4-Aplicar Filtro" << std::endl;
         std::cout << "9-Sair" << std::endl;
         std::cin >> option;
 
@@ -80,11 +83,97 @@ int main(){
             {
                 std::cout << "Não foi possível converter a imagem." << std::endl;
             }else{
-                std::cout << "Imagem convertidad com sucesso." << std::endl;
+                std::cout << "Imagem convertida com sucesso." << std::endl;
             }
             
             break;
 
+        case 4:
+            std::cout << "Em qual imagem deseja aplicar o filtro?" << std::endl;
+            std::cout << "0 - Imagem 0" << std::endl;
+            std::cout << "1 - Imagem 1" << std::endl;
+            if (!(std::cin >> imgNumber))
+            {
+                std::cin.clear(); // Limpa o estado de erro
+                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Ignora o restante da linha
+                std::cout << "Valor inválido." << std::endl;
+                break;
+            }
+
+            std::cout << "Que filtro deseja aplicar?" << std::endl;
+            std::cout << "H - Matiz" << std::endl;
+            std::cout << "S - saturação" << std::endl;
+            std::cout << "B - Brilho" << std::endl;
+            if (!(std::cin >> filterOption))
+            {
+                std::cin.clear(); // Limpa o estado de erro
+                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Ignora o restante da linha
+                std::cout << "Valor inválido." << std::endl;
+                break;
+            }
+
+            switch (filterOption)
+            {
+            case 'H':
+                std::cout << "Que fator adtivo deseja utilizar?" << std::endl;
+                if (!(std::cin >> filterFactor))
+                {
+                    std::cin.clear(); // Limpa o estado de erro
+                    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Ignora o restante da linha
+                    std::cout << "Valor inválido." << std::endl;
+                    break;
+                }
+
+                if(!file.hueFilter(imgNumber, filterFactor)){
+                    std::cout << "Não foi possível aplicar o filtro na imagem." << std::endl;
+                }else{
+                    std::cout << "Filtro de matiz aplicado com sucesso." << std::endl;
+                }
+
+                break;
+
+            case 'S':
+                std::cout << "Que fator multiplicativo deseja utilizar?" << std::endl;
+                if (!(std::cin >> filterFactor))
+                {
+                    std::cin.clear(); // Limpa o estado de erro
+                    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Ignora o restante da linha
+                    std::cout << "Valor inválido." << std::endl;
+                    break;
+                }
+
+                if(!file.saturationFilter(imgNumber, filterFactor)){
+                    std::cout << "Não foi possível aplicar o filtro na imagem." << std::endl;
+                }else{
+                    std::cout << "Filtro de saturação aplicado com sucesso." << std::endl;
+                }
+                
+                break;
+
+            case 'B':
+                std::cout << "Que fator multiplicativo deseja utilizar?" << std::endl;
+                if (!(std::cin >> filterFactor))
+                {
+                    std::cin.clear(); // Limpa o estado de erro
+                    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Ignora o restante da linha
+                    std::cout << "Valor inválido." << std::endl;
+                    break;
+                }
+
+                if(!file.brightnessFilter(imgNumber, filterFactor)){
+                    std::cout << "Não foi possível aplicar o filtro na imagem." << std::endl;
+                }else{
+                    std::cout << "Filtro de brilho aplicado com sucesso." << std::endl;
+                }
+                
+                break;
+            default:
+                std::cout << "Valor inválido." << std::endl;
+                break;
+            }
+
+
+            break;
         case 9: 
             std::cout << "Saindo..." << std::endl;
             return 0;

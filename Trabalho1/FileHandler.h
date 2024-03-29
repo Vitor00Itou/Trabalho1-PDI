@@ -13,6 +13,7 @@ public:
     FileHandler();
     ~FileHandler();
     bool readFile(std::string name, bool img);
+    bool writeFile(std::string name, bool img);
     bool showImage(bool img);
     bool RGB_HSB_RGB(bool img);
     bool hueFilter(bool img, double factor);

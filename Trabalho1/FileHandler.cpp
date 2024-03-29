@@ -24,6 +24,21 @@ bool FileHandler::readFile(std::string name, bool img)
 
 }
 
+bool FileHandler::writeFile(std::string name, bool img)
+{
+    try
+    {
+        cv::imwrite(name, image[img]);
+    }
+    catch(const std::exception& e)
+    {
+        return false;
+    }
+    
+    return true;
+
+}
+
 bool FileHandler::showImage(bool img)
 {   
     try
@@ -206,6 +221,11 @@ bool FileHandler::RGB_HSB_RGB(bool img){
 
 bool FileHandler::hueFilter(bool img, double factor){
 
+    if (image[img].empty())
+    {
+        return 0;
+    }
+
     try
     {
         RGBtoHSB(img);
@@ -240,6 +260,12 @@ bool FileHandler::hueFilter(bool img, double factor){
 }
 bool FileHandler::saturationFilter(bool img, double factor){
 
+    if (image[img].empty())
+    {
+        return 0;
+    }
+    
+
     try
     {
         RGBtoHSB(img);
@@ -271,6 +297,11 @@ bool FileHandler::saturationFilter(bool img, double factor){
     return true;
 }
 bool FileHandler::brightnessFilter(bool img, double factor){
+
+    if (image[img].empty())
+    {
+        return 0;
+    }
 
     try
     {

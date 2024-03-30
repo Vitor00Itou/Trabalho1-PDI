@@ -1,5 +1,5 @@
-#ifndef FILEHANDLER_H
-#define FILEHANDLER_H
+#ifndef IMAGEHANDLER_H
+#define IMAGEHANDLER_H
 
 #include <string>
 #include <opencv2/opencv.hpp>

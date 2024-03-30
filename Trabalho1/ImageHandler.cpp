@@ -1,4 +1,4 @@
-#include "FileHandler.h"
+#include "ImageHandler.h"
 
 ImageHandler::ImageHandler()
 {

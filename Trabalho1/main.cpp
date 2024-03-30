@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "FileHandler.h"
+#include "ImageHandler.h"
 
 int main(){
 

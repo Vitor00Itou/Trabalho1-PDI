@@ -1,16 +1,18 @@
 #include "FileHandler.h"
 
-FileHandler::FileHandler()
+ImageHandler::ImageHandler()
+{
+    // Inicializando com imagens vazias
+    // this->image[0] = NULL;
+    // this->image[1] = NULL;
+}
+
+ImageHandler::~ImageHandler()
 {
 
 }
 
-FileHandler::~FileHandler()
-{
-
-}
-
-bool FileHandler::readFile(std::string name, bool img)
+bool ImageHandler::readFile(std::string name, bool img)
 {
     
     this->image[img] = cv::imread(name);
@@ -24,7 +26,7 @@ bool FileHandler::readFile(std::string name, bool img)
 
 }
 
-bool FileHandler::writeFile(std::string name, bool img)
+bool ImageHandler::writeFile(std::string name, bool img)
 {
     try
     {
@@ -39,7 +41,7 @@ bool FileHandler::writeFile(std::string name, bool img)
 
 }
 
-bool FileHandler::showImage(bool img)
+bool ImageHandler::showImage(bool img)
 {   
     try
     {
@@ -51,12 +53,13 @@ bool FileHandler::showImage(bool img)
     }
     catch(const std::exception& e)
     {
+        std::cerr << e.what() << std::endl;
         return false;
     }
     
 }
 
-bool FileHandler::RGBtoHSB(bool img){
+bool ImageHandler::RGBtoHSB(bool img){
 
     // Cria uma nova imagem para armazenar os valores de HSB
     cv::Mat hsbImage(image[img].rows, image[img].cols, CV_32FC3);
@@ -112,7 +115,7 @@ bool FileHandler::RGBtoHSB(bool img){
     return true;
 }
 
-bool FileHandler::HSBtoRGB(bool img){
+bool ImageHandler::HSBtoRGB(bool img){
 
     // Cria uma nova imagem para armazenar os valores de RGB resultantes da conversão
     cv::Mat rgbImage(image[img].rows, image[img].cols, CV_8UC3);
@@ -199,7 +202,7 @@ bool FileHandler::HSBtoRGB(bool img){
 }
 
 
-bool FileHandler::RGB_HSB_RGB(bool img){
+bool ImageHandler::RGB_HSB_RGB(bool img){
     if (image[img].empty())
     {
         return 0;
@@ -219,7 +222,7 @@ bool FileHandler::RGB_HSB_RGB(bool img){
     return true;
 }
 
-bool FileHandler::hueFilter(bool img, double factor){
+bool ImageHandler::hueFilter(bool img, double factor){
 
     if (image[img].empty())
     {
@@ -258,7 +261,7 @@ bool FileHandler::hueFilter(bool img, double factor){
 
     return true;
 }
-bool FileHandler::saturationFilter(bool img, double factor){
+bool ImageHandler::saturationFilter(bool img, double factor){
 
     if (image[img].empty())
     {
@@ -296,7 +299,7 @@ bool FileHandler::saturationFilter(bool img, double factor){
 
     return true;
 }
-bool FileHandler::brightnessFilter(bool img, double factor){
+bool ImageHandler::brightnessFilter(bool img, double factor){
 
     if (image[img].empty())
     {
@@ -331,5 +334,33 @@ bool FileHandler::brightnessFilter(bool img, double factor){
         return false;
     }
 
+    return true;
+}
+
+bool ImageHandler::transferSaturation() {
+    if (image[0].empty() || image[1].empty())
+        return false;
+    if (image[0].rows != image[1].rows || image[0].cols != image[1].cols)
+        return false;
+
+    try
+    {
+        RGBtoHSB(0);
+        RGBtoHSB(1);
+        for (int y = 0; y < image[0].rows; ++y) {
+            for (int x = 0; x < image[0].cols; ++x) {
+                // Acessando os pixels equivalentes na posição (x, y)
+                cv::Vec3f& pixel0 = image[0].at<cv::Vec3f>(y, x);
+                cv::Vec3f& pixel1 = image[1].at<cv::Vec3f>(y, x);
+                pixel1[1] = pixel0[1];
+            }
+        }
+        HSBtoRGB(0);
+        HSBtoRGB(1);
+    }
+    catch(const std::exception& e)
+    {
+        return false;
+    }
     return true;
 }

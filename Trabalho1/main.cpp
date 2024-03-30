@@ -3,7 +3,7 @@
 
 int main(){
 
-    FileHandler file;
+    ImageHandler imgHandler;
     std::string fileName;
     bool imgNumber;
     char filterOption;
@@ -18,6 +18,7 @@ int main(){
         std::cout << "2-Vizualizar imagem" << std::endl;
         std::cout << "3-Conversão RGB-HSB-RGB" << std::endl;
         std::cout << "4-Aplicar Filtro" << std::endl;
+        std::cout << "5-Transferir Saturação de Imagens" << std::endl;
         std::cout << "8-Salvar Imagem" << std::endl;
         std::cout << "9-Sair" << std::endl;
         std::cin >> option;
@@ -41,7 +42,7 @@ int main(){
             std::cout << "Digite o nome do arquivo:" << std::endl;
             std::cin >> fileName;
 
-            if (!file.readFile(fileName, imgNumber))
+            if (!imgHandler.readFile(fileName, imgNumber))
             {
                 std::cout << "Imagem vazia carregada." << std::endl;
             }else{
@@ -62,7 +63,7 @@ int main(){
                 break;
             }
            
-            if(!file.showImage(imgNumber)){
+            if(!imgHandler.showImage(imgNumber)){
                 std::cout << "Não foi possível vizualizar a imagem." << std::endl;
             }
             
@@ -80,7 +81,7 @@ int main(){
                 break;
             }
 
-            if (!file.RGB_HSB_RGB(imgNumber))
+            if (!imgHandler.RGB_HSB_RGB(imgNumber))
             {
                 std::cout << "Não foi possível converter a imagem." << std::endl;
             }else{
@@ -103,7 +104,7 @@ int main(){
 
             std::cout << "Que filtro deseja aplicar?" << std::endl;
             std::cout << "H - Matiz" << std::endl;
-            std::cout << "S - saturação" << std::endl;
+            std::cout << "S - Saturação" << std::endl;
             std::cout << "B - Brilho" << std::endl;
             if (!(std::cin >> filterOption))
             {
@@ -116,7 +117,7 @@ int main(){
             switch (filterOption)
             {
             case 'H':
-                std::cout << "Que fator adtivo deseja utilizar?" << std::endl;
+                std::cout << "Que fator aditivo deseja utilizar?" << std::endl;
                 if (!(std::cin >> filterFactor))
                 {
                     std::cin.clear(); // Limpa o estado de erro
@@ -125,7 +126,7 @@ int main(){
                     break;
                 }
 
-                if(!file.hueFilter(imgNumber, filterFactor)){
+                if(!imgHandler.hueFilter(imgNumber, filterFactor)){
                     std::cout << "Não foi possível aplicar o filtro na imagem." << std::endl;
                 }else{
                     std::cout << "Filtro de matiz aplicado com sucesso." << std::endl;
@@ -143,7 +144,7 @@ int main(){
                     break;
                 }
 
-                if(!file.saturationFilter(imgNumber, filterFactor)){
+                if(!imgHandler.saturationFilter(imgNumber, filterFactor)){
                     std::cout << "Não foi possível aplicar o filtro na imagem." << std::endl;
                 }else{
                     std::cout << "Filtro de saturação aplicado com sucesso." << std::endl;
@@ -161,7 +162,7 @@ int main(){
                     break;
                 }
 
-                if(!file.brightnessFilter(imgNumber, filterFactor)){
+                if(!imgHandler.brightnessFilter(imgNumber, filterFactor)){
                     std::cout << "Não foi possível aplicar o filtro na imagem." << std::endl;
                 }else{
                     std::cout << "Filtro de brilho aplicado com sucesso." << std::endl;
@@ -173,6 +174,15 @@ int main(){
                 break;
             }
 
+
+            break;
+
+        case 5:
+            std::cout << "Atribuindo saturação da imagem 0 para imagem 1..." << std::endl;
+
+            if (!imgHandler.transferSaturation()) {
+                std::cout << "Não foi possível transferir a saturação." << std::endl;
+            }
 
             break;
 
@@ -193,7 +203,7 @@ int main(){
             std::cout << "Digite o nome do arquivo:" << std::endl;
             std::cin >> fileName;
 
-            if (!file.writeFile(fileName, imgNumber))
+            if (!imgHandler.writeFile(fileName, imgNumber))
             {
                 std::cout << "Imagem não foi salvada." << std::endl;
             }else{

@@ -7,11 +7,11 @@
 
 #pragma once
 
-class FileHandler
+class ImageHandler
 {
 public:
-    FileHandler();
-    ~FileHandler();
+    ImageHandler();
+    ~ImageHandler();
     bool readFile(std::string name, bool img);
     bool writeFile(std::string name, bool img);
     bool showImage(bool img);
@@ -19,7 +19,7 @@ public:
     bool hueFilter(bool img, double factor);
     bool saturationFilter(bool img, double factor);
     bool brightnessFilter(bool img, double factor);
-
+    bool transferSaturation();
 
 private:
     bool RGBtoHSB(bool img);

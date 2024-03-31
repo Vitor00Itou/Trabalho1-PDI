@@ -29,8 +29,7 @@ int main(){
             std::cout << "Qual imagem deseja carregar?" << std::endl;
             std::cout << "0 - Imagem 0" << std::endl;
             std::cout << "1 - Imagem 1" << std::endl;
-
-            if (!(std::cin >> imgNumber))
+            if (!(std::cin >> imgNumber)) // Tratamento de erro
             {
                 std::cin.clear(); // Limpa o estado de erro
                 std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Ignora o restante da linha
@@ -55,7 +54,7 @@ int main(){
             std::cout << "Qual imagem deseja visualizar?" << std::endl;
             std::cout << "0 - Imagem 0" << std::endl;
             std::cout << "1 - Imagem 1" << std::endl;
-            if (!(std::cin >> imgNumber))
+            if (!(std::cin >> imgNumber)) // Tratamento de erro
             {
                 std::cin.clear(); // Limpa o estado de erro
                 std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Ignora o restante da linha
@@ -73,7 +72,7 @@ int main(){
             std::cout << "Em qual imagem deseja aplicar a conversão RGB-HSB-RGB?" << std::endl;
             std::cout << "0 - Imagem 0" << std::endl;
             std::cout << "1 - Imagem 1" << std::endl;
-            if (!(std::cin >> imgNumber))
+            if (!(std::cin >> imgNumber)) // Tratamento de erro
             {
                 std::cin.clear(); // Limpa o estado de erro
                 std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Ignora o restante da linha
@@ -94,7 +93,7 @@ int main(){
             std::cout << "Em qual imagem deseja aplicar o filtro?" << std::endl;
             std::cout << "0 - Imagem 0" << std::endl;
             std::cout << "1 - Imagem 1" << std::endl;
-            if (!(std::cin >> imgNumber))
+            if (!(std::cin >> imgNumber)) // Tratamento de erro
             {
                 std::cin.clear(); // Limpa o estado de erro
                 std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Ignora o restante da linha
@@ -106,7 +105,7 @@ int main(){
             std::cout << "H - Matiz" << std::endl;
             std::cout << "S - Saturação" << std::endl;
             std::cout << "B - Brilho" << std::endl;
-            if (!(std::cin >> filterOption))
+            if (!(std::cin >> filterOption)) // Tratamento de erro
             {
                 std::cin.clear(); // Limpa o estado de erro
                 std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Ignora o restante da linha
@@ -118,7 +117,7 @@ int main(){
             {
             case 'H':
                 std::cout << "Que fator aditivo deseja utilizar?" << std::endl;
-                if (!(std::cin >> filterFactor))
+                if (!(std::cin >> filterFactor)) // Tratamento de erro
                 {
                     std::cin.clear(); // Limpa o estado de erro
                     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Ignora o restante da linha
@@ -136,7 +135,7 @@ int main(){
 
             case 'S':
                 std::cout << "Que fator multiplicativo deseja utilizar?" << std::endl;
-                if (!(std::cin >> filterFactor))
+                if (!(std::cin >> filterFactor)) // Tratamento de erro
                 {
                     std::cin.clear(); // Limpa o estado de erro
                     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Ignora o restante da linha
@@ -154,7 +153,7 @@ int main(){
 
             case 'B':
                 std::cout << "Que fator multiplicativo deseja utilizar?" << std::endl;
-                if (!(std::cin >> filterFactor))
+                if (!(std::cin >> filterFactor)) // Tratamento de erro
                 {
                     std::cin.clear(); // Limpa o estado de erro
                     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Ignora o restante da linha
@@ -179,14 +178,28 @@ int main(){
 
         case 5:
             bool origin, destination;
-            std::cout << "De qual imagem você quer retirar a saturação?" << std::endl;
+            std::cout << "De qual imagem você quer copiar a saturação?" << std::endl;
             std::cout << "0 - Imagem 0" << std::endl;
             std::cout << "1 - Imagem 1" << std::endl;
-            std::cin >> origin;
+            if (!(std::cin >> origin)) // Tratamento de erro
+            {
+                std::cin.clear(); // Limpa o estado de erro
+                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Ignora o restante da linha
+                std::cout << "Valor inválido." << std::endl;
+                break;
+            }
+
             std::cout << "Para qual imagem você quer atribuir a saturação?" << std::endl;
             std::cout << "0 - Imagem 0" << std::endl;
             std::cout << "1 - Imagem 1" << std::endl;
-            std::cin >> destination;
+            if (!(std::cin >> destination)) // Tratamento de erro
+            {
+                std::cin.clear(); // Limpa o estado de erro
+                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Ignora o restante da linha
+                std::cout << "Valor inválido." << std::endl;
+                break;
+            }
+
             std::cout << "Atribuindo saturação da imagem " << origin << " para imagem " << destination << "..." << std::endl;
             if (!imgHandler.transferSaturation(origin, destination)) {
                 std::cout << "Não foi possível transferir a saturação." << std::endl;

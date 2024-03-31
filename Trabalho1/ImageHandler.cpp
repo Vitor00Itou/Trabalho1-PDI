@@ -210,7 +210,7 @@ bool ImageHandler::HSBtoRGB(bool img){
 bool ImageHandler::RGB_HSB_RGB(bool img){
     if (image[img].empty())
     {
-        return 0;
+        return false;
     }
     
     try
@@ -231,7 +231,7 @@ bool ImageHandler::hueFilter(bool img, double factor){
 
     if (image[img].empty())
     {
-        return 0;
+        return false;
     }
 
     try
@@ -270,7 +270,7 @@ bool ImageHandler::saturationFilter(bool img, double factor){
 
     if (image[img].empty())
     {
-        return 0;
+        return false;
     }
     
 
@@ -308,7 +308,7 @@ bool ImageHandler::brightnessFilter(bool img, double factor){
 
     if (image[img].empty())
     {
-        return 0;
+        return false;
     }
 
     try

@@ -178,12 +178,21 @@ int main(){
             break;
 
         case 5:
-            std::cout << "Atribuindo saturação da imagem 0 para imagem 1..." << std::endl;
-
-            if (!imgHandler.transferSaturation()) {
+            bool origin, destination;
+            std::cout << "De qual imagem você quer retirar a saturação?" << std::endl;
+            std::cout << "0 - Imagem 0" << std::endl;
+            std::cout << "1 - Imagem 1" << std::endl;
+            std::cin >> origin;
+            std::cout << "Para qual imagem você quer atribuir a saturação?" << std::endl;
+            std::cout << "0 - Imagem 0" << std::endl;
+            std::cout << "1 - Imagem 1" << std::endl;
+            std::cin >> destination;
+            std::cout << "Atribuindo saturação da imagem " << origin << " para imagem " << destination << "..." << std::endl;
+            if (!imgHandler.transferSaturation(origin, destination)) {
                 std::cout << "Não foi possível transferir a saturação." << std::endl;
+                break;
             }
-
+            std::cout << "Transferência de saturação concluída." << std::endl;
             break;
 
         case 8:

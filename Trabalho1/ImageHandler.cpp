@@ -60,6 +60,10 @@ bool ImageHandler::showImage(bool img)
 }
 
 bool ImageHandler::RGBtoHSB(bool img){
+    // Se a imagem já está em HSB, não se pode transformar seus pixels novamente
+    if (imageMode[img] == HSB) {
+        return true;
+    }
 
     // Cria uma nova imagem para armazenar os valores de HSB
     cv::Mat hsbImage(image[img].rows, image[img].cols, CV_32FC3);
@@ -110,12 +114,16 @@ bool ImageHandler::RGBtoHSB(bool img){
 
     // Atualizar a imagem original com a imagem convertida para HSB
     image[img] = hsbImage;
-
+    imageMode[img] = HSB; // Setando o estado atual da imagem "img" para HSB
 
     return true;
 }
 
 bool ImageHandler::HSBtoRGB(bool img){
+    // Se a imagem já está em RGB, não se pode transformar seus pixels novamente
+    if (imageMode[img] == RGB) {
+        return true;
+    }
 
     // Cria uma nova imagem para armazenar os valores de RGB resultantes da conversão
     cv::Mat rgbImage(image[img].rows, image[img].cols, CV_8UC3);
@@ -134,10 +142,9 @@ bool ImageHandler::HSBtoRGB(bool img){
             double green = 0;
             double blue = 0;
 
-            if(s == 0)
-            {
+            if(s == 0) {
                 red = green = blue = b;
-            }else{
+            } else {
                 // Achando o setor em que estamos do circulo de cores
                 double sectorPos = h / 60.0;
                 int sectorNumber = (int)(std::floor(sectorPos));
@@ -191,12 +198,10 @@ bool ImageHandler::HSBtoRGB(bool img){
             rgbPixel[0] = (blue * 255);
             rgbPixel[1] = (green * 255);
             rgbPixel[2] = (red * 255);
-
         }
-
     }
-
     image[img] = rgbImage;
+    imageMode[img] = RGB;
 
     return true;
 }
@@ -337,26 +342,26 @@ bool ImageHandler::brightnessFilter(bool img, double factor){
     return true;
 }
 
-bool ImageHandler::transferSaturation() {
-    if (image[0].empty() || image[1].empty())
+bool ImageHandler::transferSaturation(int imgOrigin, int imgDestination) {
+    if (image[imgOrigin].empty() || image[imgDestination].empty())
         return false;
-    if (image[0].rows != image[1].rows || image[0].cols != image[1].cols)
+    if (image[imgOrigin].rows != image[imgDestination].rows || image[imgOrigin].cols != image[imgDestination].cols)
         return false;
 
     try
     {
-        RGBtoHSB(0);
-        RGBtoHSB(1);
-        for (int y = 0; y < image[0].rows; ++y) {
-            for (int x = 0; x < image[0].cols; ++x) {
+        RGBtoHSB(imgOrigin);
+        RGBtoHSB(imgDestination);
+        for (int y = 0; y < image[imgOrigin].rows; ++y) {
+            for (int x = 0; x < image[imgOrigin].cols; ++x) {
                 // Acessando os pixels equivalentes na posição (x, y)
-                cv::Vec3f& pixel0 = image[0].at<cv::Vec3f>(y, x);
-                cv::Vec3f& pixel1 = image[1].at<cv::Vec3f>(y, x);
-                pixel1[1] = pixel0[1];
+                cv::Vec3f& pixelOrigin = image[imgOrigin].at<cv::Vec3f>(y, x);
+                cv::Vec3f& pixelDest = image[imgDestination].at<cv::Vec3f>(y, x);
+                pixelDest[1] = pixelOrigin[1]; // Transferindo a saturação
             }
         }
-        HSBtoRGB(0);
-        HSBtoRGB(1);
+        HSBtoRGB(imgOrigin);
+        HSBtoRGB(imgDestination);
     }
     catch(const std::exception& e)
     {

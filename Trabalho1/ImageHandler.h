@@ -7,6 +7,11 @@
 
 #pragma once
 
+enum ImageColorSystem {
+    RGB,
+    HSB
+};
+
 class ImageHandler
 {
 public:
@@ -19,13 +24,14 @@ public:
     bool hueFilter(bool img, double factor);
     bool saturationFilter(bool img, double factor);
     bool brightnessFilter(bool img, double factor);
-    bool transferSaturation();
+    bool transferSaturation(int imgOrigin, int imgDestination);
 
 private:
     bool RGBtoHSB(bool img);
     bool HSBtoRGB(bool img);
 
     cv::Mat image[2];
+    ImageColorSystem imageMode[2];
 };
 
 #endif

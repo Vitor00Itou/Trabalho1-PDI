@@ -45,7 +45,7 @@ bool ImageHandler::showImage(bool img)
 {   
     try
     {
-        cv::imshow("Imagem" + img, this->image[img]);
+        cv::imshow("Imagem - " + std::to_string(img), this->image[img]);
         cv::waitKey(0);
         cv::destroyAllWindows();
         return true;

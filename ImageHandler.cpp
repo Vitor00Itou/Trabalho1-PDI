@@ -369,3 +369,11 @@ bool ImageHandler::transferSaturation(int imgOrigin, int imgDestination) {
     }
     return true;
 }
+
+bool ImageHandler::loadFilter(std::string filterPath) {
+
+}
+
+bool ImageHandler::applyFilter(int img) {
+
+}

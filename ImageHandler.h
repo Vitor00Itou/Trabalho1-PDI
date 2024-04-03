@@ -25,6 +25,8 @@ public:
     bool saturationFilter(bool img, double factor);
     bool brightnessFilter(bool img, double factor);
     bool transferSaturation(int imgOrigin, int imgDestination);
+    bool loadFilter(std::string filterPath);
+    bool applyFilter(int img);
 
 private:
     bool RGBtoHSB(bool img);

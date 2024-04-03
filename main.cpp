@@ -17,8 +17,9 @@ int main(){
         std::cout << "1-Carregar nova imagem" << std::endl;
         std::cout << "2-Vizualizar imagem" << std::endl;
         std::cout << "3-Conversão RGB-HSB-RGB" << std::endl;
-        std::cout << "4-Aplicar Filtro" << std::endl;
-        std::cout << "5-Transferir Saturação de Imagens" << std::endl;
+        std::cout << "4-Aplicar filtro" << std::endl;
+        std::cout << "5-Transferir saturação entre imagens" << std::endl;
+        std::cout << "6-Aplicar correlação" << std::endl;
         std::cout << "8-Salvar Imagem" << std::endl;
         std::cout << "9-Sair" << std::endl;
         std::cin >> option;
@@ -178,7 +179,7 @@ int main(){
 
         case 5:
             bool origin, destination;
-            std::cout << "De qual imagem você quer copiar a saturação?" << std::endl;
+            std::cout << "De qual imagem você quer COPIAR a saturação?" << std::endl;
             std::cout << "0 - Imagem 0" << std::endl;
             std::cout << "1 - Imagem 1" << std::endl;
             if (!(std::cin >> origin)) // Tratamento de erro
@@ -189,7 +190,7 @@ int main(){
                 break;
             }
 
-            std::cout << "Para qual imagem você quer atribuir a saturação?" << std::endl;
+            std::cout << "Para qual imagem você quer ATRIBUIR a saturação?" << std::endl;
             std::cout << "0 - Imagem 0" << std::endl;
             std::cout << "1 - Imagem 1" << std::endl;
             if (!(std::cin >> destination)) // Tratamento de erro
@@ -208,6 +209,28 @@ int main(){
             std::cout << "Transferência de saturação concluída." << std::endl;
             break;
 
+        case 6:
+            std::cout << "Digite o nome (caminho) do .txt da máscara:" << std::endl;
+            std::cin >> fileName;
+
+            std::cout << "Carregando filtro de correlação..." << std::endl;
+            if (!imgHandler.loadFilter(fileName)) {
+                std::cout << "Erro ao carregar filtro." << std::endl;
+                break;
+            }
+            
+            int img;
+            std::cout << "Em qual imagem você deseja aplicar a correlação?" << std::endl;
+            std::cin >> img;
+            std::cout << "Aplicando filtro de correlação..." << std::endl;
+            if (imgHandler.applyFilter(img)) {
+                std::cout << "Filtro aplicado com sucesso!" << std::endl;
+            } else {
+                std::cout << "Erro ao aplicar filtro." << std::endl;
+            }
+            
+            break;
+
         case 8:
             std::cout << "Qual imagem deseja salvar?" << std::endl;
             std::cout << "0 - Imagem 0" << std::endl;
@@ -220,7 +243,6 @@ int main(){
                 std::cout << "Valor inválido." << std::endl;
                 break;
             }
-            
 
             std::cout << "Digite o nome do arquivo:" << std::endl;
             std::cin >> fileName;

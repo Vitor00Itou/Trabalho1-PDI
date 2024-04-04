@@ -4,10 +4,12 @@
 #include <string>
 #include <opencv2/opencv.hpp>
 #include <cmath>
+#include <vector>
+#include <fstream>
 
 #pragma once
 
-enum ImageColorSystem {
+enum ColorSystem {
     RGB,
     HSB
 };
@@ -25,15 +27,18 @@ public:
     bool saturationFilter(bool img, double factor);
     bool brightnessFilter(bool img, double factor);
     bool transferSaturation(int imgOrigin, int imgDestination);
-    bool loadFilter(std::string filterPath);
-    bool applyFilter(int img);
+    bool loadFilterMask(std::string& filterPath);
+    bool applyCorrelation(int img);
+    
+    long getNumberOfLoadedImages();
 
 private:
     bool RGBtoHSB(bool img);
     bool HSBtoRGB(bool img);
 
-    cv::Mat image[2];
-    ImageColorSystem imageMode[2];
+    std::vector<cv::Mat&> images;
+    std::vector<ColorSystem> imageMode;
+    std::vector<std::vector<double>> filterMask;
 };
 
 #endif

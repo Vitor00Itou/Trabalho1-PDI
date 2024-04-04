@@ -3,8 +3,8 @@
 ImageHandler::ImageHandler()
 {
     // Inicializando com imagens vazias
-    // this->image[0] = NULL;
-    // this->image[1] = NULL;
+    // this->images[0] = NULL;
+    // this->images[1] = NULL;
 }
 
 ImageHandler::~ImageHandler()
@@ -15,9 +15,9 @@ ImageHandler::~ImageHandler()
 bool ImageHandler::readFile(std::string name, bool img)
 {
     
-    this->image[img] = cv::imread(name);
+    this->images[img] = cv::imread(name);
 
-    if (image[img].empty())
+    if (images[img].empty())
     {
         return false;
     }
@@ -30,7 +30,7 @@ bool ImageHandler::writeFile(std::string name, bool img)
 {
     try
     {
-        cv::imwrite(name, image[img]);
+        cv::imwrite(name, images[img]);
     }
     catch(const std::exception& e)
     {
@@ -45,7 +45,7 @@ bool ImageHandler::showImage(bool img)
 {   
     try
     {
-        cv::imshow("Imagem - " + std::to_string(img), this->image[img]);
+        cv::imshow("Imagem - " + std::to_string(img), this->images[img]);
         cv::waitKey(0);
         cv::destroyAllWindows();
         return true;
@@ -66,12 +66,12 @@ bool ImageHandler::RGBtoHSB(bool img){
     }
 
     // Cria uma nova imagem para armazenar os valores de HSB
-    cv::Mat hsbImage(image[img].rows, image[img].cols, CV_32FC3);
+    cv::Mat hsbImage(images[img].rows, images[img].cols, CV_32FC3);
     
-    for (int y = 0; y < image[img].rows; ++y) {
-        for (int x = 0; x < image[img].cols; ++x) {
+    for (int y = 0; y < images[img].rows; ++y) {
+        for (int x = 0; x < images[img].cols; ++x) {
             // Acessar o pixel na posição (x, y)
-            cv::Vec3b& pixel = image[img].at<cv::Vec3b>(y, x);
+            cv::Vec3b& pixel = images[img].at<cv::Vec3b>(y, x);
 
             // Normalizando valores
             double red = ((double)pixel[2]/255.0);
@@ -113,7 +113,7 @@ bool ImageHandler::RGBtoHSB(bool img){
     }
 
     // Atualizar a imagem original com a imagem convertida para HSB
-    image[img] = hsbImage;
+    images[img] = hsbImage;
     imageMode[img] = HSB; // Setando o estado atual da imagem "img" para HSB
 
     return true;
@@ -126,12 +126,12 @@ bool ImageHandler::HSBtoRGB(bool img){
     }
 
     // Cria uma nova imagem para armazenar os valores de RGB resultantes da conversão
-    cv::Mat rgbImage(image[img].rows, image[img].cols, CV_8UC3);
+    cv::Mat rgbImage(images[img].rows, images[img].cols, CV_8UC3);
     
-    for (int y = 0; y < image[img].rows; ++y) {
-        for (int x = 0; x < image[img].cols; ++x) {
+    for (int y = 0; y < images[img].rows; ++y) {
+        for (int x = 0; x < images[img].cols; ++x) {
             // Acessar o pixel na posição (x, y)
-            cv::Vec3f& pixel = image[img].at<cv::Vec3f>(y, x);
+            cv::Vec3f& pixel = images[img].at<cv::Vec3f>(y, x);
 
             // Recebendo os valores
             double h = ((double)pixel[2]);
@@ -200,7 +200,7 @@ bool ImageHandler::HSBtoRGB(bool img){
             rgbPixel[2] = (red * 255);
         }
     }
-    image[img] = rgbImage;
+    images[img] = rgbImage;
     imageMode[img] = RGB;
 
     return true;
@@ -208,7 +208,7 @@ bool ImageHandler::HSBtoRGB(bool img){
 
 
 bool ImageHandler::RGB_HSB_RGB(bool img){
-    if (image[img].empty())
+    if (images[img].empty())
     {
         return false;
     }
@@ -229,7 +229,7 @@ bool ImageHandler::RGB_HSB_RGB(bool img){
 
 bool ImageHandler::hueFilter(bool img, double factor){
 
-    if (image[img].empty())
+    if (images[img].empty())
     {
         return false;
     }
@@ -237,10 +237,10 @@ bool ImageHandler::hueFilter(bool img, double factor){
     try
     {
         RGBtoHSB(img);
-        for (int y = 0; y < image[img].rows; ++y) {
-            for (int x = 0; x < image[img].cols; ++x) {
+        for (int y = 0; y < images[img].rows; ++y) {
+            for (int x = 0; x < images[img].cols; ++x) {
                 // Acessar o pixel na posição (x, y)
-                cv::Vec3f& pixel = image[img].at<cv::Vec3f>(y, x);
+                cv::Vec3f& pixel = images[img].at<cv::Vec3f>(y, x);
 
                 // Recebendo os valores
                 double h = ((double)pixel[2]) + factor;
@@ -268,7 +268,7 @@ bool ImageHandler::hueFilter(bool img, double factor){
 }
 bool ImageHandler::saturationFilter(bool img, double factor){
 
-    if (image[img].empty())
+    if (images[img].empty())
     {
         return false;
     }
@@ -277,10 +277,10 @@ bool ImageHandler::saturationFilter(bool img, double factor){
     try
     {
         RGBtoHSB(img);
-        for (int y = 0; y < image[img].rows; ++y) {
-            for (int x = 0; x < image[img].cols; ++x) {
+        for (int y = 0; y < images[img].rows; ++y) {
+            for (int x = 0; x < images[img].cols; ++x) {
                 // Acessar o pixel na posição (x, y)
-                cv::Vec3f& pixel = image[img].at<cv::Vec3f>(y, x);
+                cv::Vec3f& pixel = images[img].at<cv::Vec3f>(y, x);
 
                 // Recebendo os valores
                 double s = ((double)pixel[1]) * factor;
@@ -306,7 +306,7 @@ bool ImageHandler::saturationFilter(bool img, double factor){
 }
 bool ImageHandler::brightnessFilter(bool img, double factor){
 
-    if (image[img].empty())
+    if (images[img].empty())
     {
         return false;
     }
@@ -314,10 +314,10 @@ bool ImageHandler::brightnessFilter(bool img, double factor){
     try
     {
         RGBtoHSB(img);
-        for (int y = 0; y < image[img].rows; ++y) {
-            for (int x = 0; x < image[img].cols; ++x) {
+        for (int y = 0; y < images[img].rows; ++y) {
+            for (int x = 0; x < images[img].cols; ++x) {
                 // Acessar o pixel na posição (x, y)
-                cv::Vec3f& pixel = image[img].at<cv::Vec3f>(y, x);
+                cv::Vec3f& pixel = images[img].at<cv::Vec3f>(y, x);
 
                 // Recebendo os valores
                 double b = ((double)pixel[0]) * factor;
@@ -343,20 +343,20 @@ bool ImageHandler::brightnessFilter(bool img, double factor){
 }
 
 bool ImageHandler::transferSaturation(int imgOrigin, int imgDestination) {
-    if (image[imgOrigin].empty() || image[imgDestination].empty())
+    if (images[imgOrigin].empty() || images[imgDestination].empty())
         return false;
-    if (image[imgOrigin].rows != image[imgDestination].rows || image[imgOrigin].cols != image[imgDestination].cols)
+    if (images[imgOrigin].rows != images[imgDestination].rows || images[imgOrigin].cols != images[imgDestination].cols)
         return false;
 
     try
     {
         RGBtoHSB(imgOrigin);
         RGBtoHSB(imgDestination);
-        for (int y = 0; y < image[imgOrigin].rows; ++y) {
-            for (int x = 0; x < image[imgOrigin].cols; ++x) {
+        for (int y = 0; y < images[imgOrigin].rows; ++y) {
+            for (int x = 0; x < images[imgOrigin].cols; ++x) {
                 // Acessando os pixels equivalentes na posição (x, y)
-                cv::Vec3f& pixelOrigin = image[imgOrigin].at<cv::Vec3f>(y, x);
-                cv::Vec3f& pixelDest = image[imgDestination].at<cv::Vec3f>(y, x);
+                cv::Vec3f& pixelOrigin = images[imgOrigin].at<cv::Vec3f>(y, x);
+                cv::Vec3f& pixelDest = images[imgDestination].at<cv::Vec3f>(y, x);
                 pixelDest[1] = pixelOrigin[1]; // Transferindo a saturação
             }
         }
@@ -370,10 +370,45 @@ bool ImageHandler::transferSaturation(int imgOrigin, int imgDestination) {
     return true;
 }
 
-bool ImageHandler::loadFilter(std::string filterPath) {
+std::vector<std::string> splitString(const std::string &str, char delimiter) {
+    std::vector<std::string> tokens;
+    std::istringstream iss(str);
+    std::string token;
+    
+    while (std::getline(iss, token, delimiter)) {
+        tokens.push_back(token);
+    }
+    
+    return tokens;
+}
+
+bool ImageHandler::loadFilterMask(std::string& filterPath) {
+    std::ifstream inputFile;
+    inputFile.open(filterPath);
+    if (!inputFile.is_open()) {
+        return false;
+    }
+    std::string line;
+    std::getline(inputFile, line);
+    std::vector<std::string> tokens = splitString(line, ' ');
+    int rows = std::stoi(tokens[0]);
+    int cols = std::stoi(tokens[1]);
+    for (int i = 0; i < rows; i++) {
+        std::getline(inputFile, line);
+        tokens = splitString(line, ' ');
+        for (int j = 0; j < cols; j++) {
+            this->filterMask[i][j] = std::stod(tokens[j]);
+        }
+    }
+    for (int i = 0; i < rows; i++)
+    for (int j = 0; j < rows; j++)
+    std::cout << this->filterMask[i][j] << std::endl;
+}
+
+bool ImageHandler::applyCorrelation(int img) {
 
 }
 
-bool ImageHandler::applyFilter(int img) {
-
+long ImageHandler::getNumberOfLoadedImages() {
+    return this->images.size();
 }

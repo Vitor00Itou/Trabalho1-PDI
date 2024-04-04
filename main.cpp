@@ -5,7 +5,7 @@ int main(){
 
     ImageHandler imgHandler;
     std::string fileName;
-    bool imgNumber;
+    int imgNumber;
     char filterOption;
     double filterFactor;
     int option;
@@ -27,34 +27,35 @@ int main(){
         switch (option)
         {
         case 1:
-            std::cout << "Qual imagem deseja carregar?" << std::endl;
-            std::cout << "0 - Imagem 0" << std::endl;
-            std::cout << "1 - Imagem 1" << std::endl;
-            if (!(std::cin >> imgNumber)) // Tratamento de erro
-            {
+            std::cout << "Digite o nome do arquivo:" << std::endl;
+            std::cin >> fileName;
+
+            std::cout << "Qual o nome da imagem que você quer carregar?" << std::endl;
+            if (!(std::cin >> imgNumber)) { // Tratamento de erro
                 std::cin.clear(); // Limpa o estado de erro
                 std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Ignora o restante da linha
                 std::cout << "Valor inválido." << std::endl;
                 break;
             }
-            
 
-            std::cout << "Digite o nome do arquivo:" << std::endl;
-            std::cin >> fileName;
-
-            if (!imgHandler.readFile(fileName, imgNumber))
-            {
+            if (!imgHandler.readFile(fileName, imgNumber)) {
                 std::cout << "Imagem vazia carregada." << std::endl;
-            }else{
+            } else {
                 std::cout << "Imagem carregada com sucesso." << std::endl;
             }
             
             break;
 
         case 2:
+            long nImages = imgHandler.getNumberOfLoadedImages();
+            if (!nImages) {
+                std::cout << "Nenhuma imagem está carregada." << std::endl;
+                break;
+            }
             std::cout << "Qual imagem deseja visualizar?" << std::endl;
-            std::cout << "0 - Imagem 0" << std::endl;
-            std::cout << "1 - Imagem 1" << std::endl;
+            for (int i = 0; i < nImages; i++) {
+                std::cout << i << " - Imagem " << i << std::endl;
+            }
             if (!(std::cin >> imgNumber)) // Tratamento de erro
             {
                 std::cin.clear(); // Limpa o estado de erro
@@ -214,7 +215,7 @@ int main(){
             std::cin >> fileName;
 
             std::cout << "Carregando filtro de correlação..." << std::endl;
-            if (!imgHandler.loadFilter(fileName)) {
+            if (!imgHandler.loadFilterMask(fileName)) {
                 std::cout << "Erro ao carregar filtro." << std::endl;
                 break;
             }
@@ -223,7 +224,7 @@ int main(){
             std::cout << "Em qual imagem você deseja aplicar a correlação?" << std::endl;
             std::cin >> img;
             std::cout << "Aplicando filtro de correlação..." << std::endl;
-            if (imgHandler.applyFilter(img)) {
+            if (imgHandler.applyCorrelation(img)) {
                 std::cout << "Filtro aplicado com sucesso!" << std::endl;
             } else {
                 std::cout << "Erro ao aplicar filtro." << std::endl;

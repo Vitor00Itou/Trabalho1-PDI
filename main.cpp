@@ -9,6 +9,7 @@ int main(){
     char filterOption;
     double filterFactor;
     int option;
+    long nImages;
 
     while (true)
     {
@@ -23,6 +24,8 @@ int main(){
         std::cout << "8-Salvar Imagem" << std::endl;
         std::cout << "9-Sair" << std::endl;
         std::cin >> option;
+        std::string str = "filtro.txt";
+        imgHandler.loadFilterMask(str);
 
         switch (option)
         {
@@ -47,7 +50,7 @@ int main(){
             break;
 
         case 2:
-            long nImages = imgHandler.getNumberOfLoadedImages();
+            nImages = imgHandler.getNumberOfLoadedImages();
             if (!nImages) {
                 std::cout << "Nenhuma imagem está carregada." << std::endl;
                 break;

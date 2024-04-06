@@ -29,19 +29,19 @@ public:
     bool saturationFilter(std::string& img, double factor);
     bool brightnessFilter(std::string& img, double factor);
     bool transferSaturation(std::string& imgOrigin, std::string& imgDestination);
-    bool loadFilterMask(std::string& filterPath);
+    bool loadMask(std::string& filterPath);
     bool applyCorrelation(std::string& img);
     
-    long getNumberOfLoadedImages();
+    std::vector<std::string>* getLoadedImageNames();
 
 private:
     bool RGBtoHSB(std::string& img);
     bool HSBtoRGB(std::string& img);
-    double innerProduct(int imgPivotRow, int imgPivotCol, int channel, std::string& img);
+    double innerProductByPivotPosition(int imgPivotRow, int imgPivotCol, int channel, std::string& img);
     cv::Mat& getViewableImage(std::string img);
     void expandHistogram(cv::Mat& image, int channel);
 
-    std::map<std::string, cv::Mat&> images;
+    std::map<std::string, cv::Mat*> images;
     std::map<std::string, ColorSystem> imageModes;
     std::vector<std::vector<double>> mask;
 };

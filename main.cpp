@@ -34,7 +34,7 @@ int main(){
             std::cout << "Que nome você quer dar a imagem?" << std::endl;
             std::getline(std::cin, imgName);
 
-            if (!imgHandler.readFile(fileName, imgName)) {
+            if (!imgHandler.readImageFromFile(fileName, imgName)) {
                 std::cout << "Imagem vazia carregada." << std::endl;
             } else {
                 std::cout << "Imagem carregada com sucesso." << std::endl;
@@ -194,6 +194,10 @@ int main(){
             }
             
             std::cout << "Em qual imagem você deseja aplicar a correlação?" << std::endl;
+            imgNames = imgHandler.getLoadedImageNames();
+            for (int i = 0; i < imgNames->size(); i++) {
+                std::cout << i+1 << " - " << imgNames->at(i) << std::endl;
+            }
             std::getline(std::cin, imgName);
             std::cout << "Aplicando filtro de correlação..." << std::endl;
             if (imgHandler.applyCorrelation(imgName)) {

@@ -2,9 +2,7 @@
 
 ImageHandler::ImageHandler()
 {
-    // Inicializando com imagens vazias
-    // this->images[0] = NULL;
-    // this->images[1] = NULL;
+
 }
 
 ImageHandler::~ImageHandler()
@@ -12,20 +10,25 @@ ImageHandler::~ImageHandler()
 
 }
 
-bool ImageHandler::readFile(std::string& name, std::string& img)
+bool ImageHandler::readImageFromFile(std::string& fileName, std::string& img)
 {
-    
-    cv::Mat* temp = new cv::Mat(cv::imread(name));
+    cv::Mat* temp = new cv::Mat(cv::imread(fileName));
     this->images[img] = temp;
     this->imageModes[img] = RGB;
-
     if (images[img]->empty())
     {
         return false;
     }
-
+    for (int i = 0; i < images[img]->rows; i++) {
+        for (int j = 0; j < images[img]->cols; j++) {
+            auto& pixel = images[img]->at<cv::Vec3b>(i, j);
+            // std::cout << "\nR: " << pixel[2] << std::endl;
+            // std::cout << "\nG: " << pixel[1] << std::endl;
+            // std::cout << "\nB: " << pixel[0] << std::endl;
+        }
+    }
+    std::cout << "\nDimensões: " << images[img]->rows << "x" << images[img]->cols << std::endl;
     return true;
-
 }
 
 bool ImageHandler::writeFile(std::string& name, std::string& img)
@@ -43,15 +46,15 @@ bool ImageHandler::writeFile(std::string& name, std::string& img)
 
 }
 
-void ImageHandler::expandHistogram(cv::Mat& image, int channel) {
+void ImageHandler::expandHistogram(cv::Mat* image, int channel) {
     int histogram[256];
     int min = 255, max = 0;
     const int L = 256;
 
     // Contando o histograma e achando o nível mínimo e máximo
-    for (int i = 0; i < image.rows; i++) {
-        for (int j = 0; j < image.cols; j++) {
-            auto& pixel = image.at<cv::Vec3b>(i, j);
+    for (int i = 0; i < image->rows; i++) {
+        for (int j = 0; j < image->cols; j++) {
+            auto& pixel = image->at<cv::Vec3b>(i, j);
             histogram[pixel[channel]]++;
             if (pixel[channel] > max) {
                 max = pixel[channel];
@@ -63,9 +66,9 @@ void ImageHandler::expandHistogram(cv::Mat& image, int channel) {
     }
 
     // Expandindo o histograma
-    for (int i = 0; i < image.rows; i++) {
-        for (int j = 0; j < image.cols; j++) {
-            auto& pixel = image.at<cv::Vec3b>(i, j);
+    for (int i = 0; i < image->rows; i++) {
+        for (int j = 0; j < image->cols; j++) {
+            auto& pixel = image->at<cv::Vec3b>(i, j);
             pixel[channel] = round( (double) ((histogram[pixel[channel]] - min) * (L-1)) / (max - min)); // Fórmula de expansão de histograma
         }
     }
@@ -83,17 +86,20 @@ cv::Mat& ImageHandler::getViewableImage(std::string img) {
     // Aplicando o valor absoluto
     for (int i = 0; i < images[img]->rows; i++) {
         for (int j = 0; j < images[img]->cols; j++) {
-            auto& pixel = viewableCopy->at<cv::Vec3d>(i, j);
-            pixel[2] = abs(pixel[2]);
-            pixel[1] = abs(pixel[1]);
-            pixel[0] = abs(pixel[0]);
+            auto& pixel = viewableCopy->at<cv::Vec3b>(i, j);
+            double aux = abs((double) pixel[2]) > 255 ? abs((double) pixel[2]) : 255;
+            pixel[2] = aux;
+            aux = abs((double) pixel[1]) > 255 ? abs((double) pixel[2]) : 255;
+            pixel[1] = aux;
+            aux = abs((double) pixel[0]) > 255 ? abs((double) pixel[2]) : 255;
+            pixel[0] = aux;
         }
     }
 
     // Aplicando uma expansão de histograma em cada canal
-    expandHistogram(*viewableCopy, 2);
-    expandHistogram(*viewableCopy, 1);
-    expandHistogram(*viewableCopy, 0);
+    expandHistogram(viewableCopy, 2);
+    expandHistogram(viewableCopy, 1);
+    expandHistogram(viewableCopy, 0);
     return *viewableCopy;
 }
 
@@ -104,12 +110,13 @@ bool ImageHandler::showImage(std::string& img)
         cv::Mat& viewableImg = *images[img];
         if (imageModes[img] == CORRUPTED_RGB) {
             viewableImg = getViewableImage(img);
+        } else if (imageModes[img] == HSB) {
+            HSBtoRGB(img);
         }
         cv::imshow("Imagem - " + img, viewableImg);
         cv::waitKey(0);
         cv::destroyAllWindows();
         return true;
-
     }
     catch(const std::exception& e)
     {
@@ -132,6 +139,10 @@ bool ImageHandler::RGBtoHSB(std::string& img){
         for (int x = 0; x < images[img]->cols; ++x) {
             // Acessar o pixel na posição (x, y)
             cv::Vec3b& pixel = images[img]->at<cv::Vec3b>(y, x);
+
+            // std::cout << "\nR: " << (double) pixel[2] << std::endl;
+            // std::cout << "\nG: " << (double) pixel[1] << std::endl;
+            // std::cout << "\nB: " << (double) pixel[0] << std::endl;
 
             // Normalizando valores
             double red = ((double)pixel[2]/255.0);
@@ -411,16 +422,14 @@ bool ImageHandler::transferSaturation(std::string& imgOrigin, std::string& imgDe
     {
         RGBtoHSB(imgOrigin);
         RGBtoHSB(imgDestination);
-        for (int y = 0; y < images[imgOrigin]->rows; ++y) {
-            for (int x = 0; x < images[imgOrigin]->cols; ++x) {
+        for (int i = 0; i < images[imgOrigin]->rows; ++i) {
+            for (int j = 0; j < images[imgOrigin]->cols; ++j) {
                 // Acessando os pixels equivalentes na posição (x, y)
-                cv::Vec3f& pixelOrigin = images[imgOrigin]->at<cv::Vec3f>(y, x);
-                cv::Vec3f& pixelDest = images[imgDestination]->at<cv::Vec3f>(y, x);
+                auto& pixelOrigin = images[imgOrigin]->at<cv::Vec3d>(i, j);
+                auto& pixelDest = images[imgDestination]->at<cv::Vec3d>(i, j);
                 pixelDest[1] = pixelOrigin[1]; // Transferindo a saturação
             }
         }
-        HSBtoRGB(imgOrigin);
-        HSBtoRGB(imgDestination);
     }
     catch(const std::exception& e)
     {
@@ -465,7 +474,9 @@ bool ImageHandler::loadMask(std::string& filterPath) {
 }
 
 double ImageHandler::innerProductByPivotPosition(int imgPivotRow, int imgPivotCol, int channel, std::string& img) {
-    double result;
+    double result = 0;
+
+    //std::cout << "imgPivot: (" << imgPivotRow << ")(" << imgPivotCol << ")" << std::endl;
 
     // Coordenada do pivô relativa à máscara
     int maskPivotRow = mask.size()/2;
@@ -475,9 +486,15 @@ double ImageHandler::innerProductByPivotPosition(int imgPivotRow, int imgPivotCo
             // Calculando a coordenada absoluta do produto na imagem, de acordo com a coordenada na máscara
             int imgRow = imgPivotRow - maskPivotRow + i;
             int imgCol = imgPivotCol - maskPivotCol + j;
-            result += mask[i][j] * images[img]->at<cv::Vec3s>(imgRow, imgCol)[channel];
+            auto& pixel = images[img]->at<cv::Vec3b>(imgRow, imgCol);
+            //std::cout << "mask[" << i << "][" << j << "] = " << mask[i][j] << std::endl;
+            // std::cout << "pixel[" << chs[channel] << "] = " << (double) pixel[channel] << std::endl;
+            //std::cout << "img[" << imgRow << "][" << imgCol << "] = " << (double) pixel[channel] << std::endl;
+            result += mask[i][j] * ((double) pixel[channel]);
         }
     }
+    // std::cout << "************" << std::endl;
+    //std::cout << chs[channel] << result << std::endl;
     return result;
 }
 
@@ -487,6 +504,7 @@ bool ImageHandler::applyCorrelation(std::string& img) {
     } else if (imageModes[img] == CORRUPTED_RGB) {
         return false;
     }
+    bool isMaskCorrupting = false;
 
     // Calculando os índices limite de posicionamento do pivô da máscara nas LINHAS da imagem
     bool rowsEven = mask.size()%2 == 0;
@@ -498,37 +516,33 @@ bool ImageHandler::applyCorrelation(std::string& img) {
     bool colsEven = mask[0].size()%2 == 0;
     int lastPivotCol = colsEven ? images[img]->cols - pivotCol + 1 : images[img]->cols - pivotCol;
 
-    // Construindo os novos pixels com os produtos internos de Frobenius
+    cv::Mat* correlatedImg = new cv::Mat(lastPivotRow, lastPivotCol, CV_8UC3);
+    // Construindo os novos pixels com produtos internos de Frobenius
     for (int i = pivotRow; i < lastPivotRow; i++) {
-        for (int j = pivotCol; j < lastPivotCol; i++) {
-            cv::Vec3s& newPixel = images[img]->at<cv::Vec3s>(i, j);
+        for (int j = pivotCol; j < lastPivotCol; j++) {
+            auto& newPixel = correlatedImg->at<cv::Vec3b>(i, j);
             
             double aux = innerProductByPivotPosition(i, j, 2, img);
-            if (aux > 255) {
-                aux = 255;
-            }
-            newPixel[2] = aux;
+            newPixel[2] = aux; // Vermelho (R)
+            if (aux < 0 || aux > 255)
+                isMaskCorrupting = true;
+            //std::cout << "R: " << aux << "\n*******\n" << std::endl;
 
             aux = innerProductByPivotPosition(i, j, 1, img);
-            if (aux > 255) {
-                aux = 255;
-            }
-            newPixel[1] = aux;
-            
-            aux = innerProductByPivotPosition(i, j, 0, img);
-            if (aux > 255) {
-                aux = 255;
-            }
-            newPixel[0] = aux;
-        }
-    }
-    bool isMaskCorrupting = false;
-    for (int i = 0; i < mask.size(); i++) {
-        for (int j = 0; j < mask[0].size(); j++) {
-            if (mask[i][j] < 0)
+            newPixel[1] = aux; // Verde (G)
+            if (aux < 0 || aux > 255)
                 isMaskCorrupting = true;
+            //std::cout << "G: " << aux << "\n*******\n" << std::endl;
+
+            aux = innerProductByPivotPosition(i, j, 0, img);
+            newPixel[0] = aux; // Azul (B)
+            if (aux < 0 || aux > 255)
+                isMaskCorrupting = true;
+            //std::cout << "B: " << aux << "\n*******\n" << std::endl;
         }
     }
+    delete images[img];
+    images[img] = correlatedImg;
     if (isMaskCorrupting)
         imageModes[img] = CORRUPTED_RGB;
     return true;

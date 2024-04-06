@@ -21,7 +21,7 @@ class ImageHandler
 public:
     ImageHandler();
     ~ImageHandler();
-    bool readFile(std::string& name, std::string& img);
+    bool readImageFromFile(std::string& name, std::string& img);
     bool writeFile(std::string& name, std::string& img);
     bool showImage(std::string& img);
     bool RGB_HSB_RGB(std::string& img);
@@ -39,7 +39,7 @@ private:
     bool HSBtoRGB(std::string& img);
     double innerProductByPivotPosition(int imgPivotRow, int imgPivotCol, int channel, std::string& img);
     cv::Mat& getViewableImage(std::string img);
-    void expandHistogram(cv::Mat& image, int channel);
+    void expandHistogram(cv::Mat* image, int channel);
 
     std::map<std::string, cv::Mat*> images;
     std::map<std::string, ColorSystem> imageModes;

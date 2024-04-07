@@ -88,12 +88,27 @@ cv::Mat& ImageHandler::getViewableImage(std::string img) {
     roundImageValues(viewableCopy);
     std::cout << "Arredondando valores..." << std::endl;
 
+    // limitando a 255
+    for (int i = 0; i < images[img]->rows; i++) {
+        for (int j = 0; j < images[img]->cols; j++) {
+            auto& pixel = viewableCopy->at<cv::Vec3s>(i, j);
+            int aux = (int) pixel[2] < 255 ? (int) pixel[2] : 255;
+            pixel[2] = aux;
+            aux = (int) pixel[1] < 255 ? (int) pixel[1] : 255;
+            pixel[1] = aux;
+            aux = (int) pixel[0] < 255 ? (int) pixel[0] : 255;
+            pixel[0] = aux;
+        }
+    }
+
+
+
     if (isImageOutOfBoudns(viewableCopy))
     {
         //Aplicando o valor absoluto
         for (int i = 0; i < images[img]->rows; i++) {
             for (int j = 0; j < images[img]->cols; j++) {
-                auto& pixel = viewableCopy->at<cv::Vec3b>(i, j);
+                auto& pixel = viewableCopy->at<cv::Vec3s>(i, j);
                 int aux = abs((int) pixel[2]) < 255 ? abs((int) pixel[2]) : 255;
                 pixel[2] = aux;
                 aux = abs((int) pixel[1]) < 255 ? abs((int) pixel[1]) : 255;
@@ -441,11 +456,13 @@ bool ImageHandler::transferSaturation(std::string& imgOrigin, std::string& imgDe
         for (int i = 0; i < images[imgOrigin]->rows; ++i) {
             for (int j = 0; j < images[imgOrigin]->cols; ++j) {
                 // Acessando os pixels equivalentes na posição (x, y)
-                auto& pixelOrigin = images[imgOrigin]->at<cv::Vec3d>(i, j);
-                auto& pixelDest = images[imgDestination]->at<cv::Vec3d>(i, j);
+                auto& pixelOrigin = images[imgOrigin]->at<cv::Vec3f>(i, j);
+                auto& pixelDest = images[imgDestination]->at<cv::Vec3f>(i, j);
                 pixelDest[1] = pixelOrigin[1]; // Transferindo a saturação
             }
         }
+        HSBtoRGB(imgOrigin);
+        HSBtoRGB(imgDestination);
     }
     catch(const std::exception& e)
     {

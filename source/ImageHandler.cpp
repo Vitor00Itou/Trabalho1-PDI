@@ -27,6 +27,10 @@ bool ImageHandler::writeFile(std::string& name, std::string& img)
 {
     try
     {
+
+        if (imageModes[img] != RGB) {
+            return false;
+        } 
         if (!cv::imwrite("images/" + name , *images[img]))
         {
             return false;
@@ -81,36 +85,29 @@ cv::Mat& ImageHandler::getViewableImage(std::string img) {
         return *viewableCopy;
     }
 
-    std::cout << "0" << std::endl;
     roundImageValues(viewableCopy);
-    std::cout << (*viewableCopy).at<cv::Vec3s>(200,200) << std::endl;
+    std::cout << "Arredondando valores..." << std::endl;
 
     if (isImageOutOfBoudns(viewableCopy))
     {
-        std::cout << "2" << std::endl;
-        std::cout << "3" << std::endl;
         //Aplicando o valor absoluto
         for (int i = 0; i < images[img]->rows; i++) {
             for (int j = 0; j < images[img]->cols; j++) {
                 auto& pixel = viewableCopy->at<cv::Vec3b>(i, j);
                 int aux = abs((int) pixel[2]) < 255 ? abs((int) pixel[2]) : 255;
                 pixel[2] = aux;
-                aux = abs((int) pixel[1]) < 255 ? abs((int) pixel[2]) : 255;
+                aux = abs((int) pixel[1]) < 255 ? abs((int) pixel[1]) : 255;
                 pixel[1] = aux;
-                aux = abs((int) pixel[0]) < 255 ? abs((int) pixel[2]) : 255;
+                aux = abs((int) pixel[0]) < 255 ? abs((int) pixel[0]) : 255;
                 pixel[0] = aux;
             }
         }
         expandRoundedImageHistogram(viewableCopy);
+
+        std::cout << "Aplicando expansão de histograma..." << std::endl;
     }else {
         int16ToInt8Image(viewableCopy);
     }
-    
-    std::cout << "4" << std::endl;
-
-
-
-    // Aplicando uma expansão de histograma em cada canal
 
     return *viewableCopy;
 }
@@ -151,10 +148,6 @@ bool ImageHandler::RGBtoHSB(std::string& img){
         for (int x = 0; x < images[img]->cols; ++x) {
             // Acessar o pixel na posição (x, y)
             cv::Vec3b& pixel = images[img]->at<cv::Vec3b>(y, x);
-
-            // std::cout << "\nR: " << (double) pixel[2] << std::endl;
-            // std::cout << "\nG: " << (double) pixel[1] << std::endl;
-            // std::cout << "\nB: " << (double) pixel[0] << std::endl;
 
             // Normalizando valores
             double red = ((double)pixel[2]/255.0);
@@ -316,6 +309,10 @@ bool ImageHandler::hueFilter(std::string& img, double factor){
         return false;
     }
 
+    if (imageModes[img] != RGB) {
+        return false;
+    } 
+
     try
     {
         RGBtoHSB(img);
@@ -355,6 +352,9 @@ bool ImageHandler::saturationFilter(std::string& img, double factor){
         return false;
     }
     
+    if (imageModes[img] != RGB) {
+        return false;
+    } 
 
     try
     {
@@ -392,6 +392,10 @@ bool ImageHandler::brightnessFilter(std::string& img, double factor){
     {
         return false;
     }
+
+    if (imageModes[img] != RGB) {
+        return false;
+    } 
 
     try
     {
@@ -499,14 +503,9 @@ double ImageHandler::innerProductByPivotPosition(int imgPivotRow, int imgPivotCo
             int imgRow = imgPivotRow - maskPivotRow + i;
             int imgCol = imgPivotCol - maskPivotCol + j;
             auto& pixel = images[img]->at<cv::Vec3b>(imgRow, imgCol);
-            //std::cout << "mask[" << i << "][" << j << "] = " << mask[i][j] << std::endl;
-            // std::cout << "pixel[" << chs[channel] << "] = " << (double) pixel[channel] << std::endl;
-            //std::cout << "img[" << imgRow << "][" << imgCol << "] = " << (double) pixel[channel] << std::endl;
             result += mask[i][j] * ((double) pixel[channel]);
         }
     }
-    // std::cout << "************" << std::endl;
-    //std::cout << chs[channel] << result << std::endl;
 
     return result;
 }
@@ -537,15 +536,12 @@ bool ImageHandler::applyCorrelation(std::string& img) {
             
             double aux = innerProductByPivotPosition(i, j, 2, img);
             newPixel[2] = aux; // Vermelho (R)
-            //std::cout << "R: " << aux << "\n*******\n" << std::endl;
 
             aux = innerProductByPivotPosition(i, j, 1, img);
             newPixel[1] = aux; // Verde (G)
-            //std::cout << "G: " << aux << "\n*******\n" << std::endl;
 
             aux = innerProductByPivotPosition(i, j, 0, img);
             newPixel[0] = aux; // Azul (B)
-            //std::cout << "B: " << aux << "\n*******\n" << std::endl;
         }
     }
     delete images[img];
@@ -563,6 +559,30 @@ std::vector<std::string>* ImageHandler::getLoadedImageNames() {
         }
     }
     return nameList;
+}
+
+std::vector<std::string>* ImageHandler::getLoadedImageModes() {
+    std::vector<std::string>* modeList = NULL;
+    if (imageModes.size() != 0) {
+        modeList = new std::vector<std::string>();
+        for (auto& pair : images) {
+            switch (imageModes[pair.first]) {
+                case ColorSystem::RGB: 
+                    modeList->push_back("RGB padrão");
+                    break;
+                case ColorSystem::HSB: 
+                    modeList->push_back("HSB");
+                    break;
+                case ColorSystem::CORRELATED_RGB: 
+                    modeList->push_back("RGB ponto flutuante de alta precisão");
+                    break;
+                default:
+                    modeList->push_back("Desconhecido");
+                    break;
+            }
+        }
+    }
+    return modeList;
 }
 
 bool ImageHandler::isImageOutOfBoudns(cv::Mat* image){
@@ -670,17 +690,11 @@ bool ImageHandler::int16ToInt8Image(cv::Mat* image){
             double green = ((double)pixel[1]);
             double blue = ((double)pixel[0]);
 
-            //std::cout << "ra" << red << std::endl;
-
             // Converte os valores 
             cv::Vec3b rgbPixel = rgbImage.at<cv::Vec3b>(y, x);
             rgbImage.at<cv::Vec3b>(y, x)[0] = blue; 
             rgbImage.at<cv::Vec3b>(y, x)[1] = green; 
             rgbImage.at<cv::Vec3b>(y, x)[2] = red; 
-
-
-          ///  std::cout << "rd" << rgbPixel[2] << std::endl;
-           /// std::cout << "rt" << pixel1[2] << std::endl;
 
         }
     }
@@ -688,4 +702,31 @@ bool ImageHandler::int16ToInt8Image(cv::Mat* image){
     *image = rgbImage;
     
     return true;
+}
+
+bool ImageHandler::revertToRGB(std::string& img){
+    if (imageModes[img] == HSB) {
+        return HSBtoRGB(img);
+        imageModes[img] = RGB;
+    } else if (imageModes[img] == CORRELATED_RGB) {
+        *images[img] = getViewableImage(img);
+        imageModes[img] = RGB;
+        return true;
+    } else if (imageModes[img] == RGB)
+    {
+        return true;
+    }
+    
+    return false;
+
+}
+
+ColorSystem ImageHandler::getImageMode(std::string& img){
+    if (images.find(img) != images.end())
+    {
+        return imageModes[img];
+    }else{
+        return IMAGE_DO_NOT_EXIST;
+    }
+    
 }

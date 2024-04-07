@@ -13,7 +13,8 @@
 enum ColorSystem {
     RGB,
     HSB,
-    CORRELATED_RGB
+    CORRELATED_RGB,
+    IMAGE_DO_NOT_EXIST
 };
 
 class ImageHandler
@@ -31,8 +32,12 @@ public:
     bool transferSaturation(std::string& imgOrigin, std::string& imgDestination);
     bool loadMask(std::string& filterPath);
     bool applyCorrelation(std::string& img);
+    bool revertToRGB(std::string& img);
     
     std::vector<std::string>* getLoadedImageNames();
+    std::vector<std::string>* getLoadedImageModes();
+
+    ColorSystem getImageMode(std::string& img);
 
 private:
     bool RGBtoHSB(std::string& img);

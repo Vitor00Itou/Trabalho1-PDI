@@ -184,7 +184,7 @@ int main(){
             break;
 
         case 6:
-            std::cout << "Digite o nome (caminho) do .txt da máscara:" << std::endl;
+            std::cout << "Digite o nome da máscara (exemplo.txt):" << std::endl;
             std::getline(std::cin, fileName);
 
             std::cout << "Carregando filtro de correlação..." << std::endl;

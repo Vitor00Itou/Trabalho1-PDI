@@ -12,7 +12,7 @@ ImageHandler::~ImageHandler()
 
 bool ImageHandler::readImageFromFile(std::string& fileName, std::string& img)
 {
-    cv::Mat* temp = new cv::Mat(cv::imread(fileName));
+    cv::Mat* temp = new cv::Mat(cv::imread("images/" + fileName));
     this->images[img] = temp;
     this->imageModes[img] = RGB;
     if (images[img]->empty())
@@ -27,7 +27,11 @@ bool ImageHandler::writeFile(std::string& name, std::string& img)
 {
     try
     {
-        cv::imwrite(name, *images[img]);
+        if (!cv::imwrite("images/" + name , *images[img]))
+        {
+            return false;
+        }
+        
     }
     catch(const std::exception& e)
     {
@@ -444,7 +448,7 @@ static std::vector<std::string> splitString(const std::string& str, char delimit
 
 bool ImageHandler::loadMask(std::string& filterPath) {
     std::ifstream inputFile;
-    inputFile.open(filterPath);
+    inputFile.open("masks/" + filterPath);
     if (!inputFile.is_open()) {
         return false;
     }

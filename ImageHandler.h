@@ -13,7 +13,7 @@
 enum ColorSystem {
     RGB,
     HSB,
-    CORRUPTED_RGB
+    CORRELATED_RGB
 };
 
 class ImageHandler

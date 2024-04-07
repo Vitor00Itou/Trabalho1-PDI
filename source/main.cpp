@@ -61,8 +61,14 @@ int main(){
             break;
 
         case 3:
-            std::cout << "Em qual imagem deseja aplicar a conversão RGB-HSB-RGB?" << std::endl;
             imgNames = imgHandler.getLoadedImageNames();
+            if (!imgNames)
+            {
+                std::cout << "Nenhuma imagem está carregada." << std::endl;
+                break;
+            }
+
+            std::cout << "Em qual imagem deseja aplicar a conversão RGB-HSB-RGB?" << std::endl;
             for (int i = 0; i < imgNames->size(); i++) {
                 std::cout << i+1 << " - " << imgNames->at(i) << std::endl;
             }
@@ -78,8 +84,14 @@ int main(){
             break;
 
         case 4:
-            std::cout << "Em qual imagem deseja aplicar o filtro?" << std::endl;
             imgNames = imgHandler.getLoadedImageNames();
+            if (!imgNames)
+            {
+                std::cout << "Nenhuma imagem está carregada." << std::endl;
+                break;
+            }
+
+            std::cout << "Em qual imagem deseja aplicar o filtro?" << std::endl;
             for (int i = 0; i < imgNames->size(); i++) {
                 std::cout << i+1 << " - " << imgNames->at(i) << std::endl;
             }
@@ -161,8 +173,14 @@ int main(){
             break;
 
         case 5:
-            std::cout << "De qual imagem você quer COPIAR a saturação?" << std::endl;
             imgNames = imgHandler.getLoadedImageNames();
+            if (!imgNames)
+            {
+                std::cout << "Nenhuma imagem está carregada." << std::endl;
+                break;
+            }
+
+            std::cout << "De qual imagem você quer COPIAR a saturação?" << std::endl;
             for (int i = 0; i < imgNames->size(); i++) {
                 std::cout << i+1 << " - " << imgNames->at(i) << std::endl;
             }
@@ -184,6 +202,13 @@ int main(){
             break;
 
         case 6:
+            imgNames = imgHandler.getLoadedImageNames();
+            if (!imgNames)
+            {
+                std::cout << "Nenhuma imagem está carregada." << std::endl;
+                break;
+            }
+
             std::cout << "Digite o nome da máscara (exemplo.txt):" << std::endl;
             std::getline(std::cin, fileName);
 
@@ -194,7 +219,6 @@ int main(){
             }
             
             std::cout << "Em qual imagem você deseja aplicar a correlação?" << std::endl;
-            imgNames = imgHandler.getLoadedImageNames();
             for (int i = 0; i < imgNames->size(); i++) {
                 std::cout << i+1 << " - " << imgNames->at(i) << std::endl;
             }
@@ -209,8 +233,14 @@ int main(){
             break;
 
         case 8:
-            std::cout << "Qual imagem deseja salvar em arquivo?" << std::endl;
             imgNames = imgHandler.getLoadedImageNames();
+            if (!imgNames)
+            {
+                std::cout << "Nenhuma imagem está carregada." << std::endl;
+                break;
+            }
+
+            std::cout << "Qual imagem deseja salvar em arquivo?" << std::endl;
             for (int i = 0; i < imgNames->size(); i++) {
                 std::cout << i+1 << " - " << imgNames->at(i) << std::endl;
             }

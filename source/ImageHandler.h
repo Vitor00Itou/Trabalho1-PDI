@@ -39,7 +39,11 @@ private:
     bool HSBtoRGB(std::string& img);
     double innerProductByPivotPosition(int imgPivotRow, int imgPivotCol, int channel, std::string& img);
     cv::Mat& getViewableImage(std::string img);
-    void expandHistogram(cv::Mat* image, int channel);
+    void chanelExpandHistogram(cv::Mat* image, int channel);
+    bool isImageOutOfBoudns(cv::Mat* image);
+    cv::Mat roundImageValues(cv::Mat* image);
+    cv::Mat expandRoundedImageHistogram(cv::Mat* image);
+    bool int16ToInt8Image(cv::Mat* image);
 
     std::map<std::string, cv::Mat*> images;
     std::map<std::string, ColorSystem> imageModes;

@@ -42,16 +42,14 @@ bool ImageHandler::writeFile(std::string& name, std::string& img)
 
 }
 
-void ImageHandler::expandHistogram(cv::Mat* image, int channel) {
-    std::map<int, int> histogram;
+void ImageHandler::chanelExpandHistogram(cv::Mat* image, int channel) {
     int min = INT16_MAX, max = INT16_MIN;
     const int L = 256;
 
     // Contando o histograma e achando o nível mínimo e máximo
     for (int i = 0; i < image->rows; i++) {
         for (int j = 0; j < image->cols; j++) {
-            auto& pixel = image->at<cv::Vec3f>(i, j);
-            histogram[(int) pixel[channel]]++;
+            auto& pixel = image->at<cv::Vec3s>(i, j);
             if (pixel[channel] > max) {
                 max = pixel[channel];
             }
@@ -64,38 +62,56 @@ void ImageHandler::expandHistogram(cv::Mat* image, int channel) {
     // Expandindo o histograma
     for (int i = 0; i < image->rows; i++) {
         for (int j = 0; j < image->cols; j++) {
-            auto& pixel = image->at<cv::Vec3b>(i, j);
-            pixel[channel] = round( (double) ((histogram[pixel[channel]] - min) * (L-1)) / (max - min)); // Fórmula de expansão de histograma
+            auto& pixel = image->at<cv::Vec3s>(i, j);
+            pixel[channel] = round( (double) ((pixel[channel] - min) * (L-1)) / (max - min)); // Fórmula de expansão de histograma
         }
     }
 }
 
 cv::Mat& ImageHandler::getViewableImage(std::string img) {
+
+    cv::Mat* viewableCopy = new cv::Mat();
+    *viewableCopy = *images[img];
+
+
     if (imageModes[img] == RGB) {
-        return *images[img];
+        return *viewableCopy;
     } else if (imageModes[img] == HSB) {
         HSBtoRGB(img);
-        return *images[img];
+        return *viewableCopy;
     }
-    cv::Mat* viewableCopy = images[img];
 
-    // Aplicando o valor absoluto
-    // for (int i = 0; i < images[img]->rows; i++) {
-    //     for (int j = 0; j < images[img]->cols; j++) {
-    //         auto& pixel = viewableCopy->at<cv::Vec3b>(i, j);
-    //         int aux = abs((int) pixel[2]) > 255 ? abs((int) pixel[2]) : 255;
-    //         pixel[2] = aux;
-    //         aux = abs((int) pixel[1]) > 255 ? abs((int) pixel[2]) : 255;
-    //         pixel[1] = aux;
-    //         aux = abs((int) pixel[0]) > 255 ? abs((int) pixel[2]) : 255;
-    //         pixel[0] = aux;
-    //     }
-    // }
+    std::cout << "0" << std::endl;
+    roundImageValues(viewableCopy);
+    std::cout << (*viewableCopy).at<cv::Vec3s>(200,200) << std::endl;
+
+    if (isImageOutOfBoudns(viewableCopy))
+    {
+        std::cout << "2" << std::endl;
+        std::cout << "3" << std::endl;
+        //Aplicando o valor absoluto
+        for (int i = 0; i < images[img]->rows; i++) {
+            for (int j = 0; j < images[img]->cols; j++) {
+                auto& pixel = viewableCopy->at<cv::Vec3b>(i, j);
+                int aux = abs((int) pixel[2]) < 255 ? abs((int) pixel[2]) : 255;
+                pixel[2] = aux;
+                aux = abs((int) pixel[1]) < 255 ? abs((int) pixel[2]) : 255;
+                pixel[1] = aux;
+                aux = abs((int) pixel[0]) < 255 ? abs((int) pixel[2]) : 255;
+                pixel[0] = aux;
+            }
+        }
+        expandRoundedImageHistogram(viewableCopy);
+    }else {
+        int16ToInt8Image(viewableCopy);
+    }
+    
+    std::cout << "4" << std::endl;
+
+
 
     // Aplicando uma expansão de histograma em cada canal
-    expandHistogram(viewableCopy, 2);
-    expandHistogram(viewableCopy, 1);
-    expandHistogram(viewableCopy, 0);
+
     return *viewableCopy;
 }
 
@@ -103,7 +119,7 @@ bool ImageHandler::showImage(std::string& img)
 {   
     try
     {
-        cv::Mat& viewableImg = *images[img];
+        cv::Mat viewableImg = *images[img];
         if (imageModes[img] == CORRELATED_RGB) {
             viewableImg = getViewableImage(img);
         } else if (imageModes[img] == HSB) {
@@ -491,6 +507,7 @@ double ImageHandler::innerProductByPivotPosition(int imgPivotRow, int imgPivotCo
     }
     // std::cout << "************" << std::endl;
     //std::cout << chs[channel] << result << std::endl;
+
     return result;
 }
 
@@ -546,4 +563,129 @@ std::vector<std::string>* ImageHandler::getLoadedImageNames() {
         }
     }
     return nameList;
+}
+
+bool ImageHandler::isImageOutOfBoudns(cv::Mat* image){
+    bool ans = false;
+
+    for (int i = 0; i < image->rows; i++) {
+        for (int j = 0; j < image->cols; j++) {
+            auto& pixel = image->at<cv::Vec3s>(i, j);
+            for (int k = 0; k <= 2; k++)
+            {
+                if (pixel[k] > 255 || pixel[k] < 0)
+                {
+                    ans = true;
+                }
+                
+            }
+            
+        }
+    }
+
+    return ans;
+
+}
+
+cv::Mat ImageHandler::roundImageValues(cv::Mat* image){
+    // Cria uma nova imagem para armazenar os valores inteiros resultantes da conversão
+    cv::Mat roundedImage(image->rows, image->cols, CV_16SC3);
+    
+    for (int y = 0; y < image->rows; ++y) {
+        for (int x = 0; x < image->cols; ++x) {
+            // Acessar o pixel na posição (x, y)
+            cv::Vec3f& pixel = image->at<cv::Vec3f>(y, x);
+
+            // Recebendo os valores
+            int red = ((int)pixel[2]);
+            int green = ((int)pixel[1]);
+            int blue = ((int)pixel[0]);
+
+            // Converte os valores 
+            cv::Vec3s roundedPixel = roundedImage.at<cv::Vec3s>(y, x);
+            roundedImage.at<cv::Vec3s>(y, x)[0] = blue; 
+            roundedImage.at<cv::Vec3s>(y, x)[1] = green; 
+            roundedImage.at<cv::Vec3s>(y, x)[2] = red; 
+
+        }
+
+    }
+
+    *image = roundedImage;
+
+    return roundedImage;
+
+}
+
+cv::Mat ImageHandler::expandRoundedImageHistogram(cv::Mat* image){
+    // Cria uma nova imagem para armazenar os valores de RGB resultantes da conversão
+    cv::Mat exapandedImage(image->rows, image->cols, CV_8UC3);
+
+    chanelExpandHistogram(image, 2);
+    chanelExpandHistogram(image, 1);
+    chanelExpandHistogram(image, 0);
+
+
+    for (int y = 0; y < image->rows; ++y) {
+        for (int x = 0; x < image->cols; ++x) {
+            // Acessar o pixel na posição (x, y)
+            cv::Vec3s& pixel = image->at<cv::Vec3s>(y, x);
+
+            // Recebendo os valores
+            double red = ((double)pixel[2]);
+            double green = ((double)pixel[1]);
+            double blue = ((double)pixel[0]);
+
+            // Converte os valores 
+            cv::Vec3b roundedPixel = exapandedImage.at<cv::Vec3b>(y, x);
+            exapandedImage.at<cv::Vec3b>(y, x)[0] = blue; 
+            exapandedImage.at<cv::Vec3b>(y, x)[1] = green; 
+            exapandedImage.at<cv::Vec3b>(y, x)[2] = red; 
+
+
+            
+        }
+    }
+
+    *image = exapandedImage;
+    return exapandedImage;
+
+}
+
+bool ImageHandler::int16ToInt8Image(cv::Mat* image){
+    // Cria uma nova imagem para armazenar os valores de RGB resultantes da conversão
+    cv::Mat rgbImage(image->rows, image->cols, CV_8UC3);
+
+    cv::Mat image1 = *image;
+
+    for (int y = 0; y < image->rows; ++y) {
+        for (int x = 0; x < image->cols; ++x) {
+            // Acessar o pixel na posição (x, y)
+            cv::Vec3s& pixel = image->at<cv::Vec3s>(y, x);
+
+            cv::Vec3s pixel1 = image1.at<cv::Vec3s>(y, x);
+
+            // Recebendo os valores
+            double red = ((double)pixel[2]);
+            double green = ((double)pixel[1]);
+            double blue = ((double)pixel[0]);
+
+            //std::cout << "ra" << red << std::endl;
+
+            // Converte os valores 
+            cv::Vec3b rgbPixel = rgbImage.at<cv::Vec3b>(y, x);
+            rgbImage.at<cv::Vec3b>(y, x)[0] = blue; 
+            rgbImage.at<cv::Vec3b>(y, x)[1] = green; 
+            rgbImage.at<cv::Vec3b>(y, x)[2] = red; 
+
+
+          ///  std::cout << "rd" << rgbPixel[2] << std::endl;
+           /// std::cout << "rt" << pixel1[2] << std::endl;
+
+        }
+    }
+
+    *image = rgbImage;
+    
+    return true;
 }

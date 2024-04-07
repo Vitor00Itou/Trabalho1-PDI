@@ -509,8 +509,6 @@ bool ImageHandler::loadMask(std::string& filterPath) {
 double ImageHandler::innerProductByPivotPosition(int imgPivotRow, int imgPivotCol, int channel, std::string& img) {
     double result = 0;
 
-    //std::cout << "imgPivot: (" << imgPivotRow << ")(" << imgPivotCol << ")" << std::endl;
-
     // Coordenada do pivô relativa à máscara
     int maskPivotRow = mask.size()/2;
     int maskPivotCol = mask[0].size()/2;
@@ -519,7 +517,7 @@ double ImageHandler::innerProductByPivotPosition(int imgPivotRow, int imgPivotCo
             // Calculando a coordenada absoluta do produto na imagem, de acordo com a coordenada na máscara
             int imgRow = imgPivotRow - maskPivotRow + i;
             int imgCol = imgPivotCol - maskPivotCol + j;
-            auto& pixel = images[img]->at<cv::Vec3b>(imgRow, imgCol);
+            auto& pixel = images[img]->at<cv::Vec3f>(imgRow, imgCol);
             result += mask[i][j] * ((double) pixel[channel]);
         }
     }
@@ -530,8 +528,9 @@ double ImageHandler::innerProductByPivotPosition(int imgPivotRow, int imgPivotCo
 bool ImageHandler::applyCorrelation(std::string& img) {
     if (imageModes[img] == HSB) {
         HSBtoRGB(img);
-    } else if (imageModes[img] == CORRELATED_RGB) {
-        return false;
+    } else if (imageModes[img] == RGB) {
+        int8ToFloat32Image(images[img]);
+        imageModes[img] = CORRELATED_RGB;
     }
     bool isMaskCorrupting = false;
 
@@ -563,7 +562,6 @@ bool ImageHandler::applyCorrelation(std::string& img) {
     }
     delete images[img];
     images[img] = correlatedImg;
-    imageModes[img] = CORRELATED_RGB;
     return true;
 }
 
@@ -746,4 +744,48 @@ ColorSystem ImageHandler::getImageMode(std::string& img){
         return IMAGE_DO_NOT_EXIST;
     }
     
+}
+
+bool ImageHandler::int8ToFloat32Image(cv::Mat* image){
+    // Cria uma nova imagem para armazenar os valores resultantes da conversão
+    cv::Mat floatImage(image->rows, image->cols, CV_32FC3);
+
+    for (int y = 0; y < image->rows; ++y) {
+        for (int x = 0; x < image->cols; ++x) {
+            // Acessar o pixel na posição (x, y)
+            cv::Vec3b& pixel = image->at<cv::Vec3b>(y, x);
+
+            // Recebendo os valores
+            double red = ((double)pixel[2]);
+            double green = ((double)pixel[1]);
+            double blue = ((double)pixel[0]);
+
+            // Converte os valores 
+            floatImage.at<cv::Vec3f>(y, x)[0] = blue; 
+            floatImage.at<cv::Vec3f>(y, x)[1] = green; 
+            floatImage.at<cv::Vec3f>(y, x)[2] = red; 
+
+        }
+    }
+
+    *image = floatImage;
+    
+    return true;
+
+}
+
+bool ImageHandler::createDUplicate(std::string& img, std::string& newImg){
+    try
+    {
+        cv::Mat* temp = images[img];
+        this->images[newImg] = temp;
+        this->imageModes[newImg] = imageModes[img];
+    }
+    catch(const std::exception& e)
+    {
+        return false;
+    }
+    
+    
+    return true;
 }

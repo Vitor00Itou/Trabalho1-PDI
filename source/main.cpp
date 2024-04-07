@@ -4,7 +4,7 @@
 int main(){
 
     ImageHandler imgHandler;
-    std::string fileName, imgName, origin, destination;
+    std::string fileName, imgName, newImgName, origin, destination;
     char filterOption;
     double filterFactor;
     int option;
@@ -22,8 +22,9 @@ int main(){
         std::cout << "5-Transferir saturação entre imagens" << std::endl;
         std::cout << "6-Aplicar correlação" << std::endl;
         std::cout << "7-Converter para RGB padrão" << std::endl;
-        std::cout << "8-Salvar Imagem" << std::endl;
-        std::cout << "9-Sair" << std::endl;
+        std::cout << "8-Criar duplicata de imagem carregada" << std::endl;
+        std::cout << "9-Salvar Imagem" << std::endl;
+        std::cout << "10-Sair" << std::endl;
         std::cin >> option;
 
         if (std::cin.fail() || std::cin.peek() != '\n') {
@@ -300,13 +301,6 @@ int main(){
                 break;
             }
 
-            //ALTERAR ISSO -------------------------------------------------------------------------------------------------
-            if (imgHandler.getImageMode(imgName) != RGB)
-            {
-                std::cout << "Só é possível aplicar filtros em imagens no modo RGB padrão. Connverta primeiro." << std::endl;
-                break;
-            }
-
             std::cout << "Aplicando filtro de correlação..." << std::endl;
             if (imgHandler.applyCorrelation(imgName)) {
                 std::cout << "Filtro aplicado com sucesso!" << std::endl;
@@ -352,6 +346,38 @@ int main(){
                 break;
             }
 
+            std::cout << "De qual imagem deseja criar uma duplicata?" << std::endl;
+            for (int i = 0; i < imgNames->size(); i++) {
+                std::cout << i+1 << " - " << imgNames->at(i) << " (Modo:" << imgModes->at(i) << ")" << std::endl;
+            }
+            std::getline(std::cin, imgName);
+            
+            if (imgHandler.getImageMode(imgName) == IMAGE_DO_NOT_EXIST)
+            {
+                std::cout << "Imagem não encontrada." << std::endl;
+                break;
+            }
+
+            std::cout << "Que nome você quer dar para a duplicata criada?" << std::endl;
+            std::getline(std::cin, newImgName);
+
+            if (!imgHandler.createDUplicate(imgName, newImgName)) {
+                std::cout << "Falha ao gerar duplicata." << std::endl;
+            } else {
+                std::cout << "Duplicata criada com sucesso." << std::endl;
+            }
+            
+
+            break;
+        case 9:
+            imgNames = imgHandler.getLoadedImageNames();
+            imgModes = imgHandler.getLoadedImageModes();
+            if (!imgNames)
+            {
+                std::cout << "Nenhuma imagem está carregada." << std::endl;
+                break;
+            }
+
             std::cout << "Qual imagem deseja salvar em arquivo?" << std::endl;
             for (int i = 0; i < imgNames->size(); i++) {
                 std::cout << i+1 << " - " << imgNames->at(i) << " (Modo:" << imgModes->at(i) << ")" << std::endl;
@@ -381,7 +407,7 @@ int main(){
             }
             
             break;
-        case 9: 
+        case 10: 
             std::cout << "Saindo..." << std::endl;
             return 0;
         default:

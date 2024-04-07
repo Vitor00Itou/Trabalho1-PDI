@@ -33,6 +33,7 @@ public:
     bool loadMask(std::string& filterPath);
     bool applyCorrelation(std::string& img);
     bool revertToRGB(std::string& img);
+    bool createDUplicate(std::string& img, std::string& newImg);
     
     std::vector<std::string>* getLoadedImageNames();
     std::vector<std::string>* getLoadedImageModes();
@@ -49,6 +50,7 @@ private:
     cv::Mat roundImageValues(cv::Mat* image);
     cv::Mat expandRoundedImageHistogram(cv::Mat* image);
     bool int16ToInt8Image(cv::Mat* image);
+    bool int8ToFloat32Image(cv::Mat* image);
 
     std::map<std::string, cv::Mat*> images;
     std::map<std::string, ColorSystem> imageModes;

@@ -33,7 +33,10 @@ int main(){
             // Descarta o restante da entrada inválida
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
             continue;
+        }else{
+            std::cin.ignore();
         }
+
 
 
         switch (option)
@@ -154,6 +157,7 @@ int main(){
             switch (filterOption)
             {
             case 'H':
+            case 'h':
                 std::cout << "Que fator aditivo deseja utilizar?" << std::endl;
                 if (!(std::cin >> filterFactor)) // Tratamento de erro
                 {
@@ -172,6 +176,7 @@ int main(){
                 break;
 
             case 'S':
+            case 's':
                 std::cout << "Que fator multiplicativo deseja utilizar?" << std::endl;
                 if (!(std::cin >> filterFactor)) // Tratamento de erro
                 {
@@ -190,6 +195,7 @@ int main(){
                 break;
 
             case 'B':
+            case 'b':
                 std::cout << "Que fator multiplicativo deseja utilizar?" << std::endl;
                 if (!(std::cin >> filterFactor)) // Tratamento de erro
                 {

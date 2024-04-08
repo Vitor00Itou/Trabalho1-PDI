@@ -72,7 +72,7 @@ void ImageHandler::chanelExpandHistogram(cv::Mat* image, int channel) {
     }
 }
 
-cv::Mat& ImageHandler::getViewableImage(std::string img) {
+cv::Mat& ImageHandler::getViewableImage(std::string img, int vMode) {
 
     cv::Mat* viewableCopy = new cv::Mat();
     *viewableCopy = *images[img];
@@ -88,24 +88,10 @@ cv::Mat& ImageHandler::getViewableImage(std::string img) {
     roundImageValues(viewableCopy);
     std::cout << "Arredondando valores..." << std::endl;
 
-    // limitando a 255
-    for (int i = 0; i < images[img]->rows; i++) {
-        for (int j = 0; j < images[img]->cols; j++) {
-            auto& pixel = viewableCopy->at<cv::Vec3s>(i, j);
-            int aux = (int) pixel[2] < 255 ? (int) pixel[2] : 255;
-            pixel[2] = aux;
-            aux = (int) pixel[1] < 255 ? (int) pixel[1] : 255;
-            pixel[1] = aux;
-            aux = (int) pixel[0] < 255 ? (int) pixel[0] : 255;
-            pixel[0] = aux;
-        }
-    }
-
-
-
-    if (isImageOutOfBoudns(viewableCopy))
+    switch (vMode)
     {
-        //Aplicando o valor absoluto
+    case 1:
+        // limitando entre 0 e 255
         for (int i = 0; i < images[img]->rows; i++) {
             for (int j = 0; j < images[img]->cols; j++) {
                 auto& pixel = viewableCopy->at<cv::Vec3s>(i, j);
@@ -117,23 +103,39 @@ cv::Mat& ImageHandler::getViewableImage(std::string img) {
                 pixel[0] = aux;
             }
         }
+
+        //Converte novamente para RGB vizualizavel
+        int16ToInt8Image(viewableCopy);
+
+        break;
+    case 2:
+        //Aplicando o valor absoluto
+        for (int i = 0; i < images[img]->rows; i++) {
+            for (int j = 0; j < images[img]->cols; j++) {
+                auto& pixel = viewableCopy->at<cv::Vec3s>(i, j);
+                int aux = abs((int) pixel[2]);
+                pixel[2] = aux;
+                aux = abs((int) pixel[1]);
+                pixel[1] = aux;
+                aux = abs((int) pixel[0]);
+                pixel[0] = aux;
+            }
+        }
         expandRoundedImageHistogram(viewableCopy);
 
         std::cout << "Aplicando expansão de histograma..." << std::endl;
-    }else {
-        int16ToInt8Image(viewableCopy);
     }
 
     return *viewableCopy;
 }
 
-bool ImageHandler::showImage(std::string& img)
+bool ImageHandler::showImage(std::string& img, int vMode)
 {   
     try
     {
         cv::Mat viewableImg = *images[img];
         if (imageModes[img] == CORRELATED_RGB) {
-            viewableImg = getViewableImage(img);
+            viewableImg = getViewableImage(img, vMode);
         } else if (imageModes[img] == HSB) {
             HSBtoRGB(img);
         }
@@ -458,7 +460,15 @@ bool ImageHandler::transferSaturation(std::string& imgOrigin, std::string& imgDe
                 // Acessando os pixels equivalentes na posição (x, y)
                 auto& pixelOrigin = images[imgOrigin]->at<cv::Vec3f>(i, j);
                 auto& pixelDest = images[imgDestination]->at<cv::Vec3f>(i, j);
+
+                // Se o pixel destino tiver saturação 0, ele recebe a matiz do pixel origem também
+                if (pixelDest[1] == 0)
+                {
+                    pixelDest[2] = pixelOrigin[2];
+                }
                 pixelDest[1] = pixelOrigin[1]; // Transferindo a saturação
+
+                
             }
         }
         HSBtoRGB(imgOrigin);
@@ -600,7 +610,7 @@ std::vector<std::string>* ImageHandler::getLoadedImageModes() {
     return modeList;
 }
 
-bool ImageHandler::isImageOutOfBoudns(cv::Mat* image){
+bool ImageHandler::isImageOutOfBounds(cv::Mat* image){
     bool ans = false;
 
     for (int i = 0; i < image->rows; i++) {
@@ -719,12 +729,12 @@ bool ImageHandler::int16ToInt8Image(cv::Mat* image){
     return true;
 }
 
-bool ImageHandler::revertToRGB(std::string& img){
+bool ImageHandler::revertToRGB(std::string& img, int vMode){
     if (imageModes[img] == HSB) {
         return HSBtoRGB(img);
         imageModes[img] = RGB;
     } else if (imageModes[img] == CORRELATED_RGB) {
-        *images[img] = getViewableImage(img);
+        *images[img] = getViewableImage(img, vMode);
         imageModes[img] = RGB;
         return true;
     } else if (imageModes[img] == RGB)
@@ -777,7 +787,7 @@ bool ImageHandler::int8ToFloat32Image(cv::Mat* image){
 bool ImageHandler::createDUplicate(std::string& img, std::string& newImg){
     try
     {
-        cv::Mat* temp = images[img];
+        cv::Mat* temp = new cv::Mat(*images[img]);
         this->images[newImg] = temp;
         this->imageModes[newImg] = imageModes[img];
     }

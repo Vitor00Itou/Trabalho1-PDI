@@ -24,7 +24,7 @@ public:
     ~ImageHandler();
     bool readImageFromFile(std::string& name, std::string& img);
     bool writeFile(std::string& name, std::string& img);
-    bool showImage(std::string& img);
+    bool showImage(std::string& img, int vMode);
     bool RGB_HSB_RGB(std::string& img);
     bool hueFilter(std::string& img, double factor);
     bool saturationFilter(std::string& img, double factor);
@@ -32,7 +32,7 @@ public:
     bool transferSaturation(std::string& imgOrigin, std::string& imgDestination);
     bool loadMask(std::string& filterPath);
     bool applyCorrelation(std::string& img);
-    bool revertToRGB(std::string& img);
+    bool revertToRGB(std::string& img, int vMode);
     bool createDUplicate(std::string& img, std::string& newImg);
     
     std::vector<std::string>* getLoadedImageNames();
@@ -44,9 +44,9 @@ private:
     bool RGBtoHSB(std::string& img);
     bool HSBtoRGB(std::string& img);
     double innerProductByPivotPosition(int imgPivotRow, int imgPivotCol, int channel, std::string& img);
-    cv::Mat& getViewableImage(std::string img);
+    cv::Mat& getViewableImage(std::string img, int vMode);
     void chanelExpandHistogram(cv::Mat* image, int channel);
-    bool isImageOutOfBoudns(cv::Mat* image);
+    bool isImageOutOfBounds(cv::Mat* image);
     cv::Mat roundImageValues(cv::Mat* image);
     cv::Mat expandRoundedImageHistogram(cv::Mat* image);
     bool int16ToInt8Image(cv::Mat* image);

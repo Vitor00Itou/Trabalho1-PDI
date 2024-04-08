@@ -1,13 +1,15 @@
 #include <stdio.h>
 #include "ImageHandler.h"
 
+#define QTD_VISUALIZATION_MODE 2
+
 int main(){
 
     ImageHandler imgHandler;
     std::string fileName, imgName, newImgName, origin, destination;
     char filterOption;
     double filterFactor;
-    int option;
+    int option, visualizationMode;
     std::vector<std::string>* imgNames = NULL;
     std::vector<std::string>* imgModes = NULL;
 
@@ -68,14 +70,42 @@ int main(){
             for (int i = 0; i < imgNames->size(); i++) {
                 std::cout << i+1 << " - " << imgNames->at(i) << " (Modo:" << imgModes->at(i) << ")" << std::endl;
             }
-
             std::getline(std::cin, imgName);
+
             if (imgHandler.getImageMode(imgName) == IMAGE_DO_NOT_EXIST)
             {
                 std::cout << "Imagem não encontrada." << std::endl;
                 break;
             }
-            if(!imgHandler.showImage(imgName)){
+
+            if (imgHandler.getImageMode(imgName) == CORRELATED_RGB)
+            {
+                std::cout << "Qual modo de vizualização deseja selecionar para vizualizar?" << std::endl;
+                std::cout << "1 - Truncamento" << std::endl;
+                std::cout << "2 - Valor absoluto seguido de expansão de histograma" << std::endl;
+                std::cin >> visualizationMode;
+
+                if (std::cin.fail() || std::cin.peek() != '\n') {
+                    std::cout << "Entrada inválida. Por favor, insira um valor válido." << std::endl;
+                    // Limpa o estado do fluxo de entrada
+                    std::cin.clear();
+                    // Descarta o restante da entrada inválida
+                    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                    break;;
+                }else{
+                    std::cin.ignore();
+                    if (visualizationMode < 1 || visualizationMode > QTD_VISUALIZATION_MODE)
+                    {
+                        std::cout << "Opção inválida." << std::endl;
+                        break;
+                    }
+                    
+                }
+            }else{
+                visualizationMode = 0;
+            }
+
+            if(!imgHandler.showImage(imgName, visualizationMode)){
                 std::cout << "Não foi possível vizualizar a imagem." << std::endl;
             }
             
@@ -103,7 +133,7 @@ int main(){
             }
             if (imgHandler.getImageMode(imgName) != RGB)
             {
-                std::cout << "Só é possível usar essa funcionalidade em imagens no modo RGB padrão. Connverta primeiro." << std::endl;
+                std::cout << "Só é possível usar essa funcionalidade em imagens no modo RGB padrão. Utilize a opção 7 primeiro." << std::endl;
                 break;
             }
 
@@ -138,7 +168,7 @@ int main(){
             }
             if (imgHandler.getImageMode(imgName) != RGB)
             {
-                std::cout << "Só é possível aplicar filtros em imagens no modo RGB padrão. Connverta primeiro." << std::endl;
+                std::cout << "Só é possível aplicar filtros em imagens no modo RGB padrão. Utilize a opção 7 primeiro." << std::endl;
                 break;
             }
             
@@ -242,7 +272,7 @@ int main(){
             }
             if (imgHandler.getImageMode(origin) != RGB)
             {
-                std::cout << "Só é possível transferir saturação em imagens no modo RGB padrão. Connverta primeiro." << std::endl;
+                std::cout << "Só é possível transferir saturação em imagens no modo RGB padrão. Utilize a opção 7 primeiro." << std::endl;
                 break;
             }
 
@@ -259,7 +289,7 @@ int main(){
             }
             if (imgHandler.getImageMode(destination) != RGB)
             {
-                std::cout << "Só é possível transferir saturação em imagens no modo RGB padrão. Connverta primeiro." << std::endl;
+                std::cout << "Só é possível transferir saturação em imagens no modo RGB padrão. Utilize a opção 7 primeiro." << std::endl;
                 break;
             }
 
@@ -329,8 +359,34 @@ int main(){
                 std::cout << "Imagem não encontrada." << std::endl;
                 break;
             }
+            if (imgHandler.getImageMode(imgName) == CORRELATED_RGB)
+            {
+                std::cout << "Qual modo de vizualização deseja selecionar para a conversão?" << std::endl;
+                std::cout << "1 - Truncamento" << std::endl;
+                std::cout << "2 - Valor absoluto seguido de expansão de histograma" << std::endl;
+                std::cin >> visualizationMode;
 
-            if (!imgHandler.revertToRGB(imgName))
+                if (std::cin.fail() || std::cin.peek() != '\n') {
+                    std::cout << "Entrada inválida. Por favor, insira um valor válido." << std::endl;
+                    // Limpa o estado do fluxo de entrada
+                    std::cin.clear();
+                    // Descarta o restante da entrada inválida
+                    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                    break;;
+                }else{
+                    std::cin.ignore();
+                    if (visualizationMode < 1 || visualizationMode > QTD_VISUALIZATION_MODE)
+                    {
+                        std::cout << "Opção inválida." << std::endl;
+                        break;
+                    }
+                    
+                }
+            }else{
+                visualizationMode = 0;
+            }
+            
+            if (!imgHandler.revertToRGB(imgName, visualizationMode))
             {
                 std::cout << "Não foi possível converter a imagem." << std::endl;
             }else{
@@ -392,7 +448,7 @@ int main(){
 
             if (imgHandler.getImageMode(imgName) != RGB)
             {
-                std::cout << "Só é possível salvar imagens no modo RGB padrão. Connverta primeiro." << std::endl;
+                std::cout << "Só é possível salvar imagens no modo RGB padrão. Utilize a opção 7 primeiro." << std::endl;
                 break;
             }
 

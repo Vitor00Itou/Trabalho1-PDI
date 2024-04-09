@@ -536,12 +536,24 @@ double ImageHandler::innerProductByPivotPosition(int imgPivotRow, int imgPivotCo
 }
 
 bool ImageHandler::applyCorrelation(std::string& img) {
+    if (images[img]->rows < mask.size() || images[img]->cols < mask[0].size()) {
+        std::cout << images[img]->rows << std::endl;
+        std::cout << images[img]->cols << std::endl;
+        std::cout << mask.size() << std::endl;
+        std::cout << mask[0].size() << std::endl;
+        return false;
+    }
+
     if (imageModes[img] == HSB) {
         HSBtoRGB(img);
     } else if (imageModes[img] == RGB) {
         int8ToFloat32Image(images[img]);
         imageModes[img] = CORRELATED_RGB;
     }
+    std::cout << images[img]->rows << std::endl;
+    std::cout << images[img]->cols << std::endl;
+    std::cout << mask.size() << std::endl;
+    std::cout << mask[0].size() << std::endl;
     bool isMaskCorrupting = false;
 
     // Calculando os índices limite de posicionamento do pivô da máscara nas LINHAS da imagem

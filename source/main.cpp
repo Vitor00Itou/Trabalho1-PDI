@@ -20,7 +20,7 @@ int main(){
         std::cout << "1-Carregar nova imagem" << std::endl;
         std::cout << "2-Vizualizar imagem" << std::endl;
         std::cout << "3-Conversão RGB-HSB-RGB" << std::endl;
-        std::cout << "4-Aplicar filtro" << std::endl;
+        std::cout << "4-Aplicar filtro pontual" << std::endl;
         std::cout << "5-Transferir saturação entre imagens" << std::endl;
         std::cout << "6-Aplicar correlação" << std::endl;
         std::cout << "7-Converter para RGB padrão" << std::endl;

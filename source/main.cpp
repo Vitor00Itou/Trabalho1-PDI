@@ -295,7 +295,7 @@ int main(){
 
             std::cout << "Atribuindo saturação da imagem \"" << origin << "\" para imagem \"" << destination << "\"..." << std::endl;
             if (!imgHandler.transferSaturation(origin, destination)) {
-                std::cout << "Não foi possível transferir a saturação." << std::endl;
+                std::cout << "Não foi possível transferir a saturação. Lembre-se de selecionar imagens de mesmas dimensões." << std::endl;
                 break;
             }
             std::cout << "Transferência de saturação concluída." << std::endl;
@@ -359,6 +359,12 @@ int main(){
                 std::cout << "Imagem não encontrada." << std::endl;
                 break;
             }
+            if (imgHandler.getImageMode(imgName) == EMPTY_IMAGE)
+            {
+                std::cout << "Não é possível converter uma imagem vazia." << std::endl;
+                break;
+            }
+
             if (imgHandler.getImageMode(imgName) == CORRELATED_RGB)
             {
                 std::cout << "Qual modo de vizualização deseja selecionar para a conversão?" << std::endl;

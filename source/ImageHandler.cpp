@@ -14,11 +14,12 @@ bool ImageHandler::readImageFromFile(std::string& fileName, std::string& img)
 {
     cv::Mat* temp = new cv::Mat(cv::imread("images/" + fileName));
     this->images[img] = temp;
-    this->imageModes[img] = RGB;
     if (images[img]->empty())
     {
+        this->imageModes[img] = EMPTY_IMAGE;
         return false;
     }
+    this->imageModes[img] = RGB;
     std::cout << "\nDimensões: " << images[img]->rows << "x" << images[img]->cols << std::endl;
     return true;
 }
@@ -146,7 +147,6 @@ bool ImageHandler::showImage(std::string& img, int vMode)
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << std::endl;
         return false;
     }
     
@@ -537,10 +537,6 @@ double ImageHandler::innerProductByPivotPosition(int imgPivotRow, int imgPivotCo
 
 bool ImageHandler::applyCorrelation(std::string& img) {
     if (images[img]->rows < mask.size() || images[img]->cols < mask[0].size()) {
-        std::cout << images[img]->rows << std::endl;
-        std::cout << images[img]->cols << std::endl;
-        std::cout << mask.size() << std::endl;
-        std::cout << mask[0].size() << std::endl;
         return false;
     }
 
@@ -550,10 +546,7 @@ bool ImageHandler::applyCorrelation(std::string& img) {
         int8ToFloat32Image(images[img]);
         imageModes[img] = CORRELATED_RGB;
     }
-    std::cout << images[img]->rows << std::endl;
-    std::cout << images[img]->cols << std::endl;
-    std::cout << mask.size() << std::endl;
-    std::cout << mask[0].size() << std::endl;
+
     bool isMaskCorrupting = false;
 
     // Calculando os índices limite de posicionamento do pivô da máscara nas LINHAS da imagem
@@ -561,16 +554,10 @@ bool ImageHandler::applyCorrelation(std::string& img) {
     int pivotRow = mask.size()/2;
     int lastPivotRow = rowsEven ? images[img]->rows - pivotRow + 1 : images[img]->rows - pivotRow;
 
-    std::cout << "lastpivotrow: " << lastPivotRow << std::endl;
-    std::cout << "pivotrow: " << pivotRow << std::endl;
-
     // Calculando os índices limite de posicionamento do pivô da máscara nas COLUNAS da imagem
     int pivotCol = mask[0].size()/2;
     bool colsEven = mask[0].size()%2 == 0;
     int lastPivotCol = colsEven ? images[img]->cols - pivotCol + 1 : images[img]->cols - pivotCol;
-
-    std::cout << "lastpivotcol: " << lastPivotCol << std::endl;
-    std::cout << "pivotcol: " << pivotCol << std::endl;
 
     // A nova imagem terá: ((quantidade original de linhas) - ((linhas da mascara)-1)) linhas
     // A nova imagem terá: ((quantidade original de colunas) - ((colunas da mascara)-1)) colunas
@@ -583,7 +570,6 @@ bool ImageHandler::applyCorrelation(std::string& img) {
     // Construindo os novos pixels com produtos internos de Frobenius
     for (int i = pivotRow; i < lastPivotRow; i++) {
         for (int j = pivotCol; j < lastPivotCol; j++) {
-            std::cout << "Aplicando mascara na linha " << l << " coluna " << k << std::endl;
 
             auto& newPixel = correlatedImg->at<cv::Vec3f>(l, k);
             
@@ -635,6 +621,9 @@ std::vector<std::string>* ImageHandler::getLoadedImageModes() {
                     break;
                 case ColorSystem::CORRELATED_RGB: 
                     modeList->push_back("RGB ponto flutuante de alta precisão");
+                    break;
+                case ColorSystem::EMPTY_IMAGE:
+                    modeList->push_back("Imagem vazia");
                     break;
                 default:
                     modeList->push_back("Desconhecido");

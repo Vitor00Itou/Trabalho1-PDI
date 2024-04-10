@@ -14,7 +14,8 @@ enum ColorSystem {
     RGB,
     HSB,
     CORRELATED_RGB,
-    IMAGE_DO_NOT_EXIST
+    IMAGE_DO_NOT_EXIST,
+    EMPTY_IMAGE
 };
 
 class ImageHandler

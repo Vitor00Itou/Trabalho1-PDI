@@ -600,6 +600,7 @@ bool ImageHandler::applyCorrelation(std::string& img) {
             k++;
         }
         // Próxima linha
+        k = 0;
         l++;
     }
     delete images[img];

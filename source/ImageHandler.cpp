@@ -561,16 +561,31 @@ bool ImageHandler::applyCorrelation(std::string& img) {
     int pivotRow = mask.size()/2;
     int lastPivotRow = rowsEven ? images[img]->rows - pivotRow + 1 : images[img]->rows - pivotRow;
 
+    std::cout << "lastpivotrow: " << lastPivotRow << std::endl;
+    std::cout << "pivotrow: " << pivotRow << std::endl;
+
     // Calculando os índices limite de posicionamento do pivô da máscara nas COLUNAS da imagem
     int pivotCol = mask[0].size()/2;
     bool colsEven = mask[0].size()%2 == 0;
     int lastPivotCol = colsEven ? images[img]->cols - pivotCol + 1 : images[img]->cols - pivotCol;
 
-    cv::Mat* correlatedImg = new cv::Mat(lastPivotRow, lastPivotCol, CV_32FC3);
+    std::cout << "lastpivotcol: " << lastPivotCol << std::endl;
+    std::cout << "pivotcol: " << pivotCol << std::endl;
+
+    // A nova imagem terá: ((quantidade original de linhas) - ((linhas da mascara)-1)) linhas
+    // A nova imagem terá: ((quantidade original de colunas) - ((colunas da mascara)-1)) colunas
+    cv::Mat* correlatedImg = new cv::Mat((images[img]->rows) - (mask.size()-1), (images[img]->cols) - (mask[0].size()-1), CV_32FC3);
+
+    // Variaveis para iterar sobre as linhas e colunas na nova imagems
+    int k = 0;
+    int l = 0;
+
     // Construindo os novos pixels com produtos internos de Frobenius
     for (int i = pivotRow; i < lastPivotRow; i++) {
         for (int j = pivotCol; j < lastPivotCol; j++) {
-            auto& newPixel = correlatedImg->at<cv::Vec3f>(i, j);
+            std::cout << "Aplicando mascara na linha " << l << " coluna " << k << std::endl;
+
+            auto& newPixel = correlatedImg->at<cv::Vec3f>(l, k);
             
             double aux = innerProductByPivotPosition(i, j, 2, img);
             newPixel[2] = aux; // Vermelho (R)
@@ -580,10 +595,17 @@ bool ImageHandler::applyCorrelation(std::string& img) {
 
             aux = innerProductByPivotPosition(i, j, 0, img);
             newPixel[0] = aux; // Azul (B)
+
+            // Próxima coluna
+            k++;
         }
+        // Próxima linha
+        l++;
     }
     delete images[img];
     images[img] = correlatedImg;
+    
+    std::cout << "\nDimensões: " << images[img]->rows << "x" << images[img]->cols << std::endl;
     return true;
 }
 
